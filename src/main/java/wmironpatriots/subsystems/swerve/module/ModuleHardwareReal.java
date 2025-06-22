@@ -19,6 +19,15 @@ import com.ctre.phoenix6.signals.SensorDirectionValue;
 import edu.wpi.first.units.measure.Distance;
 import lib.utils.ModuleConfig;
 
+/**
+ * <p>MK4i /w l3 ratio
+ *
+ * <p>Kraken x60 for pivot
+ *
+ * <p>Kraken x44 for drive
+ *
+ * <p>CANcoder absolute encoder
+ */
 public class ModuleHardwareReal extends ModuleHardware {
     public static final double PIVOT_REDUCTION = 150 / 7;
     public static final double DRIVE_REDUCTION = 6.12;

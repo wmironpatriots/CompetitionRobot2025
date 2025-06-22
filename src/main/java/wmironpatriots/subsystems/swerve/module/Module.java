@@ -4,6 +4,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 
+/** Public interface for a Swerve Module */
 public class Module {
     private final ModuleHardware hardware;
 
@@ -12,11 +13,10 @@ public class Module {
     }
 
     /**
-     * Set angle and speed setpoints of the module
-     *
-     * @param setpointState {@link SwerveModuleState} representing the desired angle and speed of the
-     *     module
-     * @return {@link SwerveModuleState} representing the applied optimized setpoints
+     * Set angle and speed setpoints
+     * 
+     * @param setpointState {@link SwerveModuleState} representing angle and speed setpoint
+     * @return optimized {@link SwerveModuleState}
      */
     public SwerveModuleState setSetpoints(SwerveModuleState setpointState) {
         // Minimize the change in heading
@@ -31,7 +31,7 @@ public class Module {
         return setpointState;
     }
 
-    /** Stop all module movement */
+    /** Stop motors */
     public void stop() {
         hardware.stop();
     }
@@ -44,14 +44,14 @@ public class Module {
     }
 
     /**
-     * @return {@link SwerveModuleState} representing the measured position and speed of the module
+     * @return {@link SwerveModuleState} representing the current speed and angle
      */
     public SwerveModuleState getSwerveModuleState() {
         return new SwerveModuleState(hardware.getDriveSpeedMps(), getRotation2d());
     }
 
     /**
-     * @return {@link SwerveModulePosition} representing the measured field pose of the module
+     * @return {@link SwerveModulePosition} representing the current drive distance and angle
      */
     public SwerveModulePosition getSwerveModulePosition() {
         return new SwerveModulePosition(hardware.getDriveDistanceMeters(), getRotation2d());

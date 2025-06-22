@@ -10,6 +10,9 @@ import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import lib.utils.ModuleConfig;
 
+/**
+ * Sim version of {@link ModuleHardwareReal}
+ */
 public class ModuleHardwareSim extends ModuleHardware {
     private final DCMotor pivotModel = DCMotor.getKrakenX60Foc(1);
     private final DCMotor driveModel = DCMotor.getKrakenX60Foc(1);
