@@ -4,24 +4,29 @@ import monologue.Annotations.Log;
 
 /** Generalized Hardware methods for a Swerve Module */
 public abstract class ModuleHardware {
-    @Log public double pivotPoseRevs;
-    @Log public double driveSpeedMps;
     @Log public double pivotSetpointPoseRevs;
+    @Log public double pivotPoseRevs;
+
     @Log public double driveSetpointSpeedMps;
+    @Log public double driveSpeedMps;
+    @Log public double driveDistanceMeters;
+
+    @Log public double encoderPoseRevs;
 
     /**
      * @return pivot motor's position in Revolutions
      */
-    public double getPivotPoseRevs() {
-        return pivotPoseRevs;
-    }
+    public abstract double getPivotPoseRevs();
+
+    /**
+     * @return distance driven by drive motor in Meters
+     */
+    public abstract double getDriveDistanceMeters();
 
     /**
      * @return drive motor's speed in Meters Per Second
      */
-    public double getDriveSpeedMps() {
-        return driveSpeedMps;
-    }
+    public abstract double getDriveSpeedMps();
 
     /**
      * Set pivot motor's voltage setpoint
