@@ -22,11 +22,35 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import wmironpatriots.Constants.FLAGS;
+import wmironpatriots.Constants.MATRIXID;
+import wmironpatriots.Robot;
 import wmironpatriots.subsystems.swerve.gyro.Gyro;
+import wmironpatriots.subsystems.swerve.gyro.GyroPigeon;
 import wmironpatriots.subsystems.swerve.module.Module;
+import wmironpatriots.subsystems.swerve.module.ModuleHardwareReal;
+import wmironpatriots.subsystems.swerve.module.ModuleHardwareSim;
 
 /** Swerve Subsystem Class */
 public class Swerve implements Subsystem {
+    public static Swerve create() {
+        var moduleConfigs = SwerveConstants.MODULE_CONFIGS;
+        var modules = new Module[moduleConfigs.length];
+
+        if (Robot.isReal()) {
+            for (int i = 0; i < modules.length; i++) {
+                modules[i] = new Module(new ModuleHardwareReal(moduleConfigs[i]));
+            }
+
+            return new Swerve(new GyroPigeon(MATRIXID.PIGEON), modules);
+        } else {
+            for (int i = 0; i < modules.length; i++) {
+                modules[i] = new Module(new ModuleHardwareSim(moduleConfigs[i]));
+            }
+
+            return new Swerve(new GyroPigeon(MATRIXID.PIGEON), modules);
+        }
+    }
+
     private final Module[] modules;
     private final Gyro gyro;
 
@@ -45,7 +69,7 @@ public class Swerve implements Subsystem {
             .getStructArrayTopic("SwerveStateSetpoints", SwerveModuleState.struct)
             .publish();
 
-    public Swerve(Gyro gyro, Module... modules) {
+    private Swerve(Gyro gyro, Module... modules) {
         this.modules = modules;
         this.gyro = gyro;
 

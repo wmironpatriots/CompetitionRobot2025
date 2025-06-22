@@ -6,7 +6,10 @@
  
 package wmironpatriots;
 
+import static edu.wpi.first.units.Units.Seconds;
+
 import com.ctre.phoenix6.SignalLogger;
+
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -22,17 +25,20 @@ import monologue.Logged;
 import monologue.Monologue;
 import monologue.Monologue.MonologueConfig;
 import wmironpatriots.Constants.FLAGS;
+import wmironpatriots.subsystems.swerve.Swerve;
 
 public class Robot extends CommandRobot implements Logged {
   // HARDWARE
   private final CommandXboxController driver = new CommandXboxController(0);
   private final CommandXboxController operator = new CommandXboxController(1);
 
+  private final Swerve swerve = Swerve.create();
+
   // ALERTS
   private final Alert browningOut;
 
   public Robot() {
-    super(FLAGS.LOOPTIME);
+    super(FLAGS.LOOPTIME.in(Seconds));
 
     // Shut up driverstation
     DriverStation.silenceJoystickConnectionWarning(true);
@@ -82,9 +88,18 @@ public class Robot extends CommandRobot implements Logged {
         .onTrue(Commands.run(() -> browningOut.set(true)));
 
     configureBindings();
+    configureGameBehavior();
   }
 
-  private void configureBindings() {}
+  private void configureBindings() {
+    swerve.setDefaultCommand(
+      swerve.driveFromMagnitudes(
+        driver::getLeftY, 
+        driver::getLeftX, 
+        driver::getRightX));
+  }
+
+  private void configureGameBehavior() {}
 
   @Override
   protected Command getAutonCommand() {
