@@ -2,6 +2,7 @@ package wmironpatriots.subsystems.swerve.gyro;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 
+/** Generalized Hardware methods for a gyro */
 public abstract class Gyro {
     /**
      * @return {@link Rotation2d} representing the gyro heading
