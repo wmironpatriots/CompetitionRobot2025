@@ -9,7 +9,6 @@ package wmironpatriots;
 import static edu.wpi.first.units.Units.Seconds;
 
 import com.ctre.phoenix6.SignalLogger;
-
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -93,10 +92,7 @@ public class Robot extends CommandRobot implements Logged {
 
   private void configureBindings() {
     swerve.setDefaultCommand(
-      swerve.driveFromMagnitudes(
-        driver::getLeftY, 
-        driver::getLeftX, 
-        driver::getRightX));
+        swerve.driveFromMagnitudes(driver::getLeftY, driver::getLeftX, driver::getRightX));
   }
 
   private void configureGameBehavior() {}
