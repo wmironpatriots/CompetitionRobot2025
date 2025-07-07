@@ -1,0 +1,75 @@
+// Copyright (c) 2025 FRC 6423 - Ward Melville Iron Patriots
+// https://github.com/FIRSTTeam6423
+// 
+// Open Source Software; you can modify and/or share it under the terms of
+// MIT license file in the root directory of this project
+
+package org.frc6423.wmironpatriots.subsystems.swerve.module;
+
+import org.frc6423.monologue.Annotations.Log;
+import org.frc6423.monologue.Logged;
+
+/** Generalized Hardware methods for a Swerve Module */
+public abstract class ModuleHardware implements Logged {
+  @Log public double pivotSetpointPoseRevs;
+  @Log public double pivotPoseRevs;
+
+  @Log public double driveSetpointSpeedMps;
+  @Log public double driveSpeedMps;
+  @Log public double driveDistanceMeters;
+
+  @Log public double encoderPoseRevs;
+
+  /**
+   * @return pivot motor's position in Revolutions
+   */
+  public abstract double getPivotPoseRevs();
+
+  /**
+   * @return distance driven by drive motor in Meters
+   */
+  public abstract double getDriveDistanceMeters();
+
+  /**
+   * @return drive motor's speed in Meters Per Second
+   */
+  public abstract double getDriveSpeedMps();
+
+  /**
+   * Set pivot motor's voltage setpoint
+   *
+   * @param volts desired voltage setpoint
+   */
+  public abstract void setPivotAppliedVolts(double volts);
+
+  /**
+   * Set drive motor's voltage setpoint
+   *
+   * @param volts desired voltage setpoint
+   */
+  public abstract void setDriveAppliedVolts(double volts);
+
+  /**
+   * Set pivot motor's position setpoint
+   *
+   * @param volts desired position setpoint in Revolutions
+   */
+  public abstract void setPivotSetpointPose(double poseRevs);
+
+  /**
+   * Set drive motor's speed setpoint
+   *
+   * @param volts desired speed setpoint in MMeters Per Second
+   */
+  public abstract void setDriveSetpointSpeed(double speedMps);
+
+  /** Stop both pivot and drive motors */
+  public abstract void stop();
+
+  /**
+   * Toggle motor coasting
+   *
+   * @param enabled should coasting be enabled?
+   */
+  public abstract void coastingEnabled(boolean enabled);
+}
