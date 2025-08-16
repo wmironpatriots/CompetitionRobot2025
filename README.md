@@ -1,6 +1,15 @@
-# FRC Team 6423's 2025 codebase
-##### Swiming robot
+# IronBase
+>###### A robot codebase template
 
-![Img](./assets/imgs/cascadeWireframe.webp)
+## Getting Started
+Generate a repo from this template (make sure to not include all branches)
 
-- This year's #OpenAlliance [build thread](https://www.chiefdelphi.com/t/6423-iron-patriots-2025-reefscape-build-thread/477430/3)
+## Post-Codebase-Creation Checklist
+* [ ] Update to most recent WPIlib version
+* [ ] Update to most recent vendordeps
+* [ ] Push updated libs to IronBase Repo
+* [ ] Update all references to the year (search for `<YEAR>` in repo)
+* [ ] Resolve all `TODO` comments in repo
+* [ ] Import branch rulesets in .github/rulesets
+* [ ] Update [`Authors.md`](./Authors.md)
+* [ ] Replace this README :)

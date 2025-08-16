@@ -1,0 +1,35 @@
+#!/bin/sh
+#
+# Simple pre-commit hook that checks for formating
+
+# Escape sequences
+RED='\e[31m!'
+NC='\e[0m'
+
+echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+echo "~~~ Starting Pre-Commit Checks ~~~"
+echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+
+# Gather the staged files - to make sure changes are saved only for these files.
+stagedFiles=$(git diff --staged --name-only)
+
+# Check if spotless formated
+echo " * Spotless Check? "
+./gradlew spotlessCheck
+
+status=$?
+
+if [ "$status" = 0 ] ; then
+	echo "Spotless Check Success!"
+	for file in $stagedFiles; do
+		if test -f "$file"; then
+			git add $file
+		fi
+	done
+else
+	echo 1>&2 -e "${RED}---------------------------!${NC}"
+	echo 1>&2 -e "${RED}-- SPOTLESS CHECK FAILED --!${NC}"
+	echo 1>&2 -e "${RED}---------------------------!${NC}"
+	echo "Run ./gradlew spotlessApply and try again!"
+	exit 1
+fi
