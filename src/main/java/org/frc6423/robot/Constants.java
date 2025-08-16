@@ -10,7 +10,7 @@ import static edu.wpi.first.units.Units.Seconds;
 
 import com.ctre.phoenix6.CANBus;
 import edu.wpi.first.units.measure.Time;
-import org.frc6423.lib.CanDeviceId;
+import org.frc6423.lib.drivers.CanDeviceId;
 
 /**
  * Stores global immutable values called "constants"

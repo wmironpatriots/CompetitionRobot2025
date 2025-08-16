@@ -4,12 +4,13 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // MIT license file in the root directory of this project
 
-package org.frc6423.lib;
+package org.frc6423.lib.drivers;
 
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import org.frc6423.lib.utilities.Tracer;
 
 /**
  * @see https://github.com/wpilibsuite/allwpilib/pull/5939

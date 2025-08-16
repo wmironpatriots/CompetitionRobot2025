@@ -4,7 +4,7 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // MIT license file in the root directory of this project
 
-package org.frc6423.lib;
+package org.frc6423.lib.types;
 
 /** Represents a boolean that will have a final value of true once toggled */
 public class Latch {
