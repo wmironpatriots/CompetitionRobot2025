@@ -1,5 +1,5 @@
 # Authors
 ```
-Dasun L. Abeykoon (dabeycorn)
+Dasun Abeykoon (dabeycorn)
 Andrew Samulyak (arsamulyak)
 ```

@@ -1,8 +1,9 @@
 plugins {
     id "java"
     id "edu.wpi.first.GradleRIO" version "2025.3.2"
-    id 'com.diffplug.spotless' version '7.0.2'
+    id "com.diffplug.spotless" version "7.0.4"
     id "com.peterabeles.gversion" version "1.10.3"
+    id "io.freefair.lombok" version "8.14"
 }
 
 java {
@@ -10,7 +11,7 @@ java {
     targetCompatibility = JavaVersion.VERSION_17
 }
 
-def ROBOT_MAIN_CLASS = "wmironpatriots.Main"
+def ROBOT_MAIN_CLASS = "org.frc6423.robot.Main"
 
 // Define my targets (RoboRIO) and artifacts (deployable files)
 // This is added by GradleRIO's backing project DeployUtils.
@@ -29,7 +30,18 @@ deploy {
                 // getTargetTypeClass is a shortcut to get the class type using a string
 
                 frcJava(getArtifactTypeClass('FRCJavaArtifact')) {
+                    jvmArgs.add("-XX:+UnlockExperimentalVMOptions")
+                    jvmArgs.add("-XX:GCTimeRatio=5")
+                    jvmArgs.add("-XX:+UseSerialGC")
+                    jvmArgs.add("-XX:MaxGCPauseMillis=50")
+
+                    // RIO 2.0 ONLY
+                    final MAX_JAVA_HEAP_SIZE_MB = 100;
+                    jvmArgs.add("-Xmx" + MAX_JAVA_HEAP_SIZE_MB + "M")
+                    jvmArgs.add("-Xms" + MAX_JAVA_HEAP_SIZE_MB + "M")
+                    jvmArgs.add("-XX:+AlwaysPreTouch")
                 }
+
 
                 // Static files artifact
                 frcStaticFileDeploy(getArtifactTypeClass('FileTreeArtifact')) {
@@ -71,16 +83,19 @@ dependencies {
     nativeRelease wpi.java.vendor.jniRelease(wpi.platforms.desktop)
     simulationRelease wpi.sim.enableRelease()
 
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.1'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-
-    implementation "javax.annotation:javax.annotation-api:1.3.2"
-    testImplementation 'com.google.code.findbugs:jsr305:3.0.2'
+    // Junit testing
+    implementation 'org.junit.jupiter:junit-jupiter-api:5.11.4'
+    testImplementation(platform('org.junit:junit-bom:5.13.3'))
+    testImplementation('org.junit.jupiter:junit-jupiter')
+    testRuntimeOnly('org.junit.platform:junit-platform-launcher')
 }
 
 test {
     useJUnitPlatform()
     systemProperty 'junit.jupiter.extensions.autodetection.enabled', 'true'
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
 }
 
 // Simulation configuration (e.g. environment variables).
@@ -91,7 +106,11 @@ wpi.sim.addDriverstation().defaultEnabled = true
 // in order to make them all available at runtime. Also adding the manifest so WPILib
 // knows where to look for our Robot Class.
 jar {
-    from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
+    from {
+        configurations.runtimeClasspath.collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
+    }
     from sourceSets.main.allSource
     manifest edu.wpi.first.gradlerio.GradleRIOPlugin.javaManifest(ROBOT_MAIN_CLASS)
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
@@ -105,14 +124,23 @@ wpi.java.configureTestTasks(test)
 // Configure string concat to always inline compile
 tasks.withType(JavaCompile) {
     options.compilerArgs.add '-XDstringConcat=inline'
-    options.encoding = 'UTF-8'
+}
+
+// Configure pre-commit hooks on first build
+task installGitHooks(type: Copy) {
+    logger.info("~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+    logger.info("~~~ Installing Git Hooks ~~~")
+    logger.info("~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+    from '.scripts'
+    into '.git/hooks'
+    logger.info("Successfully Installed Hooks!")
 }
 
 // Generate Build Constants
 project.compileJava.dependsOn(createVersionFile)
 gversion {
     srcDir = "src/main/java"
-    classPackage = "wmironpatriots"
+    classPackage = "org.frc6423.robot"
     className = "BuildConstants"
     dateFormat = "yyyy-MM-dd'T'HH:mm:ss'Z'"
     timeZone = "GMT-4"
@@ -132,11 +160,41 @@ spotless {
         removeUnusedImports()
         trimTrailingWhitespace()
         endWithNewline()
-        licenseHeader("// Copyright (c) 2025 FRC 6423 - Ward Melville Iron Patriots \n// https://github.com/wmironpatriots \n//\n// Open Source Software; you can modify and/or share it under the terms of \n// MIT license file in the root directory of this project \n \n")
-        // Copyright (c) 2025 FRC 6423 - Ward Melville Iron Patriots 
-        // https://github.com/FIRSTTeam6423 
-        //
-        // Open Source Software; you can modify and/or share it under the terms of 
-        // MIT license file in the root directory of this project 
+        licenseHeader("// Copyright (c) 2025 FRC 6423 - Ward Melville Iron Patriots\n// https://github.com/wmironpatriots\n// \n// Open Source Software; you can modify and/or share it under the terms of\n// MIT license file in the root directory of this project\n\n")
+    }
+    groovyGradle {
+        target fileTree('.') {
+            include '**/*.gradle'
+            exclude '**/build/**', '**/build-*/**'
+            greclipse()
+            leadingTabsToSpaces(4)
+            trimTrailingWhitespace()
+            endWithNewline()
+        }
+    }
+    format 'xml', {
+        target fileTree('.') {
+            include '**/*.xml'
+            exclude '**/build/**', '**/build-*/**', '**/venv/**'
+        }
+        eclipseWtp('xml')
+        trimTrailingWhitespace()
+        leadingTabsToSpaces(2)
+        endWithNewline()
+    }
+    json {
+        target fileTree(".") {
+            include "**/*.json"
+            exclude "**/build/**", "**/build-*/**", "northstar/**"
+        }
+    }
+    format 'misc', {
+        target fileTree('.') {
+            include '**/*.md', '**/.gitignore'
+            exclude '**/build/**', '**/build-*/**', '**/venv/**'
+        }
+        trimTrailingWhitespace()
+        leadingTabsToSpaces(4)
+        endWithNewline()
     }
 }
