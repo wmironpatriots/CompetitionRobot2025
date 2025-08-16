@@ -36,9 +36,6 @@ public class Robot extends CommandRobot implements Logged {
   // * SUBSYSTEM INIT
   /** Replace this line with subsystem declerations */
 
-  // * TRIGGER INIT
-  /** Replace this line with trigger declerations */
-
   // * ALERT INIT
   private final Alert batteryBrownout = new Alert("Battery voltage output low", AlertType.kWarning);
 
@@ -89,6 +86,13 @@ public class Robot extends CommandRobot implements Logged {
 
   /** Update all driver dashboard values on NetworkTables */
   private void updateDashboard() {
+    // Update Visualizers
+    SmartDashboard.putNumber("Battery Volts", RobotController.getBatteryVoltage());
+    SmartDashboard.putNumber("CPU Temps", RobotController.getCPUTemp());
+    SmartDashboard.putBoolean("RSL status", RobotController.getRSLState());
+    SmartDashboard.putNumber("Match Time", DriverStation.getMatchTime());
+
+    // Update Alerts
     batteryBrownout.set(RobotController.isBrownedOut());
     driverDisconnected.set(!driverController.isConnected());
     operatorDisconnected.set(!operatorController.isConnected());
