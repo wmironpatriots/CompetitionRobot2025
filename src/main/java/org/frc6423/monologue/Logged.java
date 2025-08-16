@@ -1,4 +1,4 @@
-// TODO PUT COPYRIGHT YEAR!!! Copyright (c) <YEAR> FRC 6423 - Ward Melville Iron Patriots
+// Copyright (c) 2025 FRC 6423 - Ward Melville Iron Patriots
 // https://github.com/wmironpatriots
 // 
 // Open Source Software; you can modify and/or share it under the terms of

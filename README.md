@@ -8,7 +8,7 @@ Generate a repo from this template (make sure to not include all branches)
 * [ ] Update to most recent WPIlib version
 * [ ] Update to most recent vendordeps
 * [ ] Push updated libs to IronBase Repo
-* [ ] Update all references to the year (search for `<YEAR>` in repo)
+* [ ] Update all references to the year (search for `2025` in repo)
 * [ ] Resolve all `TODO` comments in repo
 * [ ] Import branch rulesets in .github/rulesets
 * [ ] Update [`Authors.md`](./Authors.md)
