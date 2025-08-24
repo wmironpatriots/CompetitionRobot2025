@@ -8,10 +8,6 @@ package org.frc6423.robot;
 
 import static edu.wpi.first.units.Units.Seconds;
 
-import org.frc6423.lib.drivers.CommandRobot;
-import org.frc6423.lib.utilities.Tracer;
-import org.frc6423.robot.Constants.Flags;
-
 import edu.wpi.first.epilogue.Epilogue;
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.epilogue.logging.LazyBackend;
@@ -27,6 +23,8 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import org.frc6423.lib.drivers.CommandRobot;
+import org.frc6423.robot.Constants.Flags;
 
 /**
  * Declares the structure of the robot program (subsystems, commands, triggers, etc.).
@@ -53,7 +51,7 @@ public class Robot extends CommandRobot {
 
   public Robot() {
     // Set looptime from its flag
-    super(Flags.LOOPTIME.in(Seconds));
+    super(Flags.PERIOD.in(Seconds));
 
     // Prevent driverstation from clogging output
     DriverStation.silenceJoystickConnectionWarning(true);
@@ -86,8 +84,13 @@ public class Robot extends CommandRobot {
             config.errorHandler = ErrorHandler.crashOnError();
           }
 
-          // Log everything
-          config.minimumImportance = Logged.Importance.DEBUG;
+          if (Flags.debugMode || isSimulation()) {
+            // Log everything
+            config.minimumImportance = Logged.Importance.DEBUG;
+          } else {
+            // Only log information
+            config.minimumImportance = Logged.Importance.INFO;
+          }
         });
     Epilogue.bind(this);
 

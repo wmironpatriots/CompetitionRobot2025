@@ -20,7 +20,11 @@ import org.frc6423.lib.types.CanDeviceId;
 public class Constants {
   /** Constants that affect robot behavior during runtime */
   public class Flags {
-    public static final Time LOOPTIME = Seconds.of(0.02);
+    /** Represents how often periodic robot logic will run */
+    public static final Time PERIOD = Seconds.of(0.02);
+
+    /** When true, the robot will enable debug menus and log debug information */
+    public static final boolean debugMode = false;
   }
 
   /** Constants representing port IDs that devices are connected to */
