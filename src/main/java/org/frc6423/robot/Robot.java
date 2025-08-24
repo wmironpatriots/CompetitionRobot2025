@@ -8,20 +8,25 @@ package org.frc6423.robot;
 
 import static edu.wpi.first.units.Units.Seconds;
 
+import org.frc6423.lib.drivers.CommandRobot;
+import org.frc6423.lib.utilities.Tracer;
+import org.frc6423.robot.Constants.Flags;
+
+import edu.wpi.first.epilogue.Epilogue;
+import edu.wpi.first.epilogue.Logged;
+import edu.wpi.first.epilogue.logging.LazyBackend;
+import edu.wpi.first.epilogue.logging.NTEpilogueBackend;
+import edu.wpi.first.epilogue.logging.errors.ErrorHandler;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
+import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import org.frc6423.lib.drivers.CommandRobot;
-import org.frc6423.lib.utilities.Tracer;
-import org.frc6423.monologue.Logged;
-import org.frc6423.monologue.Monologue;
-import org.frc6423.monologue.Monologue.MonologueConfig;
-import org.frc6423.robot.Constants.Flags;
 
 /**
  * Declares the structure of the robot program (subsystems, commands, triggers, etc.).
@@ -29,7 +34,8 @@ import org.frc6423.robot.Constants.Flags;
  * <p>Only scheduler calls are allowed in the {@link Robot} periodic method. Very little logic
  * should be defined in it.
  */
-public class Robot extends CommandRobot implements Logged {
+@Logged
+public class Robot extends CommandRobot {
   // * IO INIT
   private final XboxController driverController = new XboxController(0);
   private final XboxController operatorController = new XboxController(1);
@@ -52,31 +58,38 @@ public class Robot extends CommandRobot implements Logged {
     // Prevent driverstation from clogging output
     DriverStation.silenceJoystickConnectionWarning(true);
 
-    // Initialize Monologue
-    Monologue.setupMonologue(
-        this,
-        "/Robot",
-        new MonologueConfig()
-            .withAllowNonFinalLoggedFields(true)
-            .withDatalogPrefix("Telemetry")
-            .withLazyLogging(true)
-            .withOptimizeBandwidth(DriverStation::isFMSAttached)
-            .withThrowOnWarning(false));
+    // Initialize Epilogue
+    Epilogue.configure(
+        config -> {
+          // Set root data path
+          config.root = "Telemetry";
 
-    // Log build data to datalog
-    final String meta = "/BuildData/";
-    Monologue.log(meta + "RuntimeType", getRuntimeType().toString());
-    Monologue.log(meta + "ProjectName", BuildConstants.MAVEN_NAME);
-    Monologue.log(meta + "Version", BuildConstants.VERSION);
-    Monologue.log(meta + "BuildDate", BuildConstants.BUILD_DATE);
-    Monologue.log(meta + "GitDirty", String.valueOf(BuildConstants.DIRTY));
-    Monologue.log(meta + "GitSHA", BuildConstants.GIT_SHA);
-    Monologue.log(meta + "GitDate", BuildConstants.GIT_DATE);
-    Monologue.log(meta + "GitBranch", BuildConstants.GIT_BRANCH);
+          // Mirror NT logged data to log file
+          DataLogManager.start();
+          // Lazy log to NT
+          config.backend =
+              new LazyBackend(new NTEpilogueBackend(NetworkTableInstance.getDefault()));
 
-    // Update and trace monologue periodically
-    addPeriodic(
-        () -> Tracer.traceFunc("Monologue", Monologue::updateAll), Flags.LOOPTIME.in(Seconds));
+          // Log build data to datalog
+          final String meta = "/BuildData/";
+          config.backend.log(meta + "RuntimeType", getRuntimeType().toString());
+          config.backend.log(meta + "ProjectName", BuildConstants.MAVEN_NAME);
+          config.backend.log(meta + "Version", BuildConstants.VERSION);
+          config.backend.log(meta + "BuildDate", BuildConstants.BUILD_DATE);
+          config.backend.log(meta + "GitDirty", String.valueOf(BuildConstants.DIRTY));
+          config.backend.log(meta + "GitSHA", BuildConstants.GIT_SHA);
+          config.backend.log(meta + "GitDate", BuildConstants.GIT_DATE);
+          config.backend.log(meta + "GitBranch", BuildConstants.GIT_BRANCH);
+
+          // crash sim on epilogue error
+          if (isSimulation()) {
+            config.errorHandler = ErrorHandler.crashOnError();
+          }
+
+          // Log everything
+          config.minimumImportance = Logged.Importance.DEBUG;
+        });
+    Epilogue.bind(this);
 
     // Update drive dashboard periodically
     addPeriodic(this::updateDashboard, 0.02);
