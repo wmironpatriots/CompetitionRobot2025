@@ -8,10 +8,9 @@ package org.frc6423.robot;
 
 import static edu.wpi.first.units.Units.Seconds;
 
-import org.frc6423.lib.types.CanDeviceId;
-
 import com.ctre.phoenix6.CANBus;
 import edu.wpi.first.units.measure.Time;
+import org.frc6423.lib.types.CanDeviceId;
 
 /**
  * Stores global immutable values called "constants"
