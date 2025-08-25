@@ -6,6 +6,7 @@
 
 package org.frc6423.robot;
 
+import static edu.wpi.first.epilogue.Logged.Importance.INFO;
 import static edu.wpi.first.units.Units.Seconds;
 
 import edu.wpi.first.epilogue.Epilogue;
@@ -19,12 +20,15 @@ import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
-import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import org.frc6423.lib.drivers.CommandRobot;
 import org.frc6423.robot.Constants.Flags;
+import org.frc6423.robot.subsystems.arm.Arm;
+import org.frc6423.robot.subsystems.arm.ArmIOSim;
+import org.frc6423.robot.subsystems.arm.ArmState;
 
 /**
  * Declares the structure of the robot program (subsystems, commands, triggers, etc.).
@@ -35,11 +39,12 @@ import org.frc6423.robot.Constants.Flags;
 @Logged
 public class Robot extends CommandRobot {
   // * IO INIT
-  private final XboxController driverController = new XboxController(0);
-  private final XboxController operatorController = new XboxController(1);
+  private final CommandXboxController driverController = new CommandXboxController(0);
+  private final CommandXboxController operatorController = new CommandXboxController(1);
 
   // * SUBSYSTEM INIT
-  /** Replace this line with subsystem declerations */
+  @Logged(importance = INFO)
+  private final Arm arm = new Arm(new ArmIOSim());
 
   // * ALERT INIT
   private final Alert batteryBrownout = new Alert("Battery voltage output low", AlertType.kWarning);
@@ -84,21 +89,16 @@ public class Robot extends CommandRobot {
             config.errorHandler = ErrorHandler.crashOnError();
           }
 
-          if (Flags.debugMode || isSimulation()) {
-            // Log everything
-            config.minimumImportance = Logged.Importance.DEBUG;
-          } else {
-            // Only log information
-            config.minimumImportance = Logged.Importance.INFO;
-          }
+          // Log everything
+          config.minimumImportance = Logged.Importance.DEBUG;
         });
     Epilogue.bind(this);
 
     // Update drive dashboard periodically
     addPeriodic(this::updateDashboard, 0.02);
 
-    configureBindings();
     configureGameBehavior();
+    configureBindings();
   }
 
   /** Update all driver dashboard values on NetworkTables */
@@ -115,11 +115,16 @@ public class Robot extends CommandRobot {
     operatorDisconnected.set(!operatorController.isConnected());
   }
 
-  /** Configure all Driver & Operator controller bindings */
-  private void configureBindings() {}
-
   /** Configure behavior during different match sections */
-  private void configureGameBehavior() {}
+  private void configureGameBehavior() {
+    arm.setDefaultCommand(arm.runState(ArmState.STOWED));
+  }
+
+  /** Configure all Driver & Operator controller bindings */
+  private void configureBindings() {
+    driverController.b().whileTrue(arm.runState(ArmState.AVOIDING));
+    driverController.x().whileTrue(arm.runState(ArmState.INTAKING));
+  }
 
   @Override
   protected Command getAutonCommand() {
