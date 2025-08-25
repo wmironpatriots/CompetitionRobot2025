@@ -6,6 +6,8 @@
 
 package org.frc6423.robot.subsystems.arm;
 
+import static edu.wpi.first.epilogue.Logged.Importance.*;
+
 import edu.wpi.first.epilogue.Logged;
 
 /** Generalized hardware methods for {@link Arm} subsystem */
@@ -16,25 +18,31 @@ public interface ArmIO extends AutoCloseable {
   /**
    * @return angle of pivot motor in radians
    */
-  @Logged(importance = Logged.Importance.INFO)
+  @Logged(name = "Pivot Motor Angle (Radians)", importance = INFO)
   public double getPivotAngleRads();
 
   /**
    * @return setpoint angle of pivot motor in radians
    */
-  @Logged(importance = Logged.Importance.INFO)
+  @Logged(name = "Pivot Motor Setpoint Angle (Radians)", importance = INFO)
   public double getPivotSetpointAngleRads();
 
   /**
    * @return stator current of pivot motor
    */
-  @Logged(importance = Logged.Importance.INFO)
+  @Logged(name = "Pivot Motor Stator Current (Amps)", importance = INFO)
   public double getPivotStatorCurrentAmps();
+
+  /**
+   * @return speed of roller motor in revs per minute
+   */
+  @Logged(name = "Roller Motor Speed (Revs Per Minute)", importance = INFO)
+  public double getRollerSpeedRpm();
 
   /**
    * @return stator current of roller motor
    */
-  @Logged(importance = Logged.Importance.INFO)
+  @Logged(name = "Roller Motor Stator Current (Amps)", importance = INFO)
   public double getRollerStatorCurrentAmps();
 
   /**
