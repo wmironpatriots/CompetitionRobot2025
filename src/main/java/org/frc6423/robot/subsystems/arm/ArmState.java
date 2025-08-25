@@ -9,11 +9,12 @@ package org.frc6423.robot.subsystems.arm;
 import edu.wpi.first.math.geometry.Rotation2d;
 
 /** Represents a state the {@link Arm} subsystem can be in */
+// TODO put actual angles
 public enum ArmState {
   /** Resting state */
-  STOWED(Rotation2d.fromDegrees(0.0), 0.0),
+  STOWED(Rotation2d.fromDegrees(0), 0.0),
   /** Avoidance state for preventing collisions */
-  AVOIDING(Rotation2d.fromDegrees(0.0), 0.0),
+  AVOIDING(Rotation2d.fromDegrees(20), 0.0),
   /** Flipped state for intaking */
   INTAKING(Rotation2d.fromDegrees(0.0), 0.0),
   /** L2 pose but not scoring */
