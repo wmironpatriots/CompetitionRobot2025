@@ -27,6 +27,11 @@ public class ArmIONone implements ArmIO {
   }
 
   @Override
+  public double getRollerSpeedRpm() {
+    return 0.0;
+  }
+
+  @Override
   public double getRollerStatorCurrentAmps() {
     return 0.0;
   }
