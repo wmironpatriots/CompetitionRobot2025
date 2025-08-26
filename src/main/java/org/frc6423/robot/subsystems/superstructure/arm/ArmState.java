@@ -14,7 +14,7 @@ public enum ArmState {
   /** Resting state */
   STOWED(Rotation2d.fromDegrees(90), 0.0),
   /** Avoidance state for preventing collisions */
-  AVOIDING(Rotation2d.fromDegrees(72), 0.0),
+  AVOIDING(Rotation2d.fromDegrees(65), 0.0),
   /** Flipped state for intaking */
   INTAKING(Rotation2d.fromDegrees(-90), 20.0),
   /** L2 pose but not scoring */
@@ -22,13 +22,13 @@ public enum ArmState {
   /** L3 pose but not scoring */
   L3_PRIMED(Rotation2d.fromDegrees(21.975), 0.0),
   /** L4 pose but not scoring */
-  L4_PRIMED(Rotation2d.fromDegrees(0.0), 0.0), // TODO L4 ANGLE
+  L4_PRIMED(Rotation2d.fromDegrees(74.5), 0.0), // TODO L4 ANGLE
   /** L2 scoring */
   L2_SCORING(Rotation2d.fromDegrees(21.975), -40.0),
   /** L3 scoring */
   L3_SCORING(Rotation2d.fromDegrees(21.975), -40.0),
   /** L4 scoring */
-  L4_SCORING(Rotation2d.fromDegrees(0.0), -40.0); // TODO L4 ANGLE
+  L4_SCORING(Rotation2d.fromDegrees(74.5), -40.0); // TODO L4 ANGLE
 
   public final Rotation2d angle;
   public final double rollerSpeedRpm;
