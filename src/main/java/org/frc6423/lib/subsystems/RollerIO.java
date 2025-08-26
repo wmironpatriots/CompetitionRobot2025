@@ -8,7 +8,7 @@ package org.frc6423.lib.subsystems;
 
 import edu.wpi.first.epilogue.Logged;
 
-/** Generalized hardware methods for {@link Arm} subsystem */
+/** Generalized hardware methods for {@link Roller} subsystem */
 public interface RollerIO extends AutoCloseable {
   /** Run periodic hardware logic */
   public void periodic();
