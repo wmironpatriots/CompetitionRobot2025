@@ -39,11 +39,11 @@ public class Roller extends SubsystemBase {
    * @param minStallAmps minimum roller motor stator current considered stalling in amps
    * @return true if roller motor is stalling
    */
-  private boolean isStalling(double minStallAmps) {
+  protected boolean isStalling(double minStallAmps) {
     return Math.abs(filteredCurrent) > 30.0;
   }
 
-  private void setCurrentFilterTaps(int taps) {
+  protected void setCurrentFilterTaps(int taps) {
     currentFilter = LinearFilter.movingAverage(taps);
   }
 
@@ -53,7 +53,7 @@ public class Roller extends SubsystemBase {
    * @param volts desired volts
    * @return {@link Command}
    */
-  private Command runVolts(DoubleSupplier volts) {
+  protected Command runVolts(DoubleSupplier volts) {
     return this.run(() -> hardware.setVolts(volts.getAsDouble()));
   }
 
@@ -63,7 +63,7 @@ public class Roller extends SubsystemBase {
    * @param volts desired volts
    * @return {@link Command}
    */
-  private Command runVolts(double volts) {
+  protected Command runVolts(double volts) {
     return runVolts(() -> volts);
   }
 
@@ -73,7 +73,7 @@ public class Roller extends SubsystemBase {
    * @param speedRpm desired speed in revs per minute
    * @return {@link Command}
    */
-  private Command runSpeed(DoubleSupplier speedRpm) {
+  protected Command runSpeed(DoubleSupplier speedRpm) {
     return this.run(() -> hardware.setSpeed(speedRpm.getAsDouble()));
   }
 
@@ -83,7 +83,7 @@ public class Roller extends SubsystemBase {
    * @param speedRpm desired speed in revs per minute
    * @return {@link Command}
    */
-  private Command runSpeed(double speedRpm) {
+  protected Command runSpeed(double speedRpm) {
     return runSpeed(() -> speedRpm);
   }
 }
