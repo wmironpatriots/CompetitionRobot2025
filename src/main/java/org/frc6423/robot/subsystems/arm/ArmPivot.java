@@ -38,7 +38,8 @@ public class ArmPivot extends SubsystemBase implements AutoCloseable {
   public static final MomentOfInertia MOI = KilogramSquareMeters.of(0.001);
   public static final Distance LENGTH = Inches.of(7.5);
 
-  public static final Angle MAX_ANGLE = Degrees.of(180);
+  public static final Angle MIN_ANGLE = Degrees.of(-90);
+  public static final Angle MAX_ANGLE = Degrees.of(90);
   public static final Angle TOLERANCE = Degrees.of(1.5);
 
   @Logged(name = "Arm Pivot Hardware Loggables")
@@ -74,7 +75,7 @@ public class ArmPivot extends SubsystemBase implements AutoCloseable {
     filteredPivotCurrent = pivotCurrentFilter.calculate(hardware.getStatorCurrentAmps());
 
     visualizer.setAngle(
-        Rotation2d.fromRadians(hardware.getAngleRads()).plus(Rotation2d.kCCW_90deg));
+        Rotation2d.fromRadians(hardware.getAngleRads()).unaryMinus().rotateBy(Rotation2d.k180deg));
   }
 
   /**

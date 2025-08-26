@@ -27,7 +27,7 @@ public class ArmPivotIOSim implements ArmPivotIO {
           PIVOT_GEARING,
           MOI.in(KilogramSquareMeters),
           LENGTH.in(Meters),
-          0,
+          MIN_ANGLE.in(Radians),
           MAX_ANGLE.in(Radians),
           false,
           0);
@@ -73,7 +73,7 @@ public class ArmPivotIOSim implements ArmPivotIO {
   @Override
   public void setAngle(double angleRads) {
     // Clamp value within range
-    angleRads = MathUtil.clamp(angleRads, 0.0, MAX_ANGLE.in(Radians));
+    angleRads = MathUtil.clamp(angleRads, MIN_ANGLE.in(Radians), MAX_ANGLE.in(Radians));
 
     // Calculate fb output
     var fbOut = pivotFeedback.calculate(getAngleRads(), angleRads);

@@ -12,11 +12,11 @@ import edu.wpi.first.math.geometry.Rotation2d;
 // TODO CHECK ROLLER SPEEDS
 public enum ArmState {
   /** Resting state */
-  STOWED(Rotation2d.fromDegrees(-90), 0.0),
+  STOWED(Rotation2d.fromDegrees(90), 0.0),
   /** Avoidance state for preventing collisions */
-  AVOIDING(Rotation2d.fromDegrees(-72), 0.0),
+  AVOIDING(Rotation2d.fromDegrees(72), 0.0),
   /** Flipped state for intaking */
-  INTAKING(Rotation2d.fromDegrees(90), 20.0),
+  INTAKING(Rotation2d.fromDegrees(-90), 20.0),
   /** L2 pose but not scoring */
   L2_PRIMED(Rotation2d.fromDegrees(21.975), 0.0),
   /** L3 pose but not scoring */
