@@ -24,7 +24,7 @@ public class Constants {
     public static final Time PERIOD = Seconds.of(0.02);
 
     /** When true, the robot will enable debug menus and log debug information */
-    public static final boolean debugMode = false;
+    @Deprecated public static final boolean debugMode = false;
   }
 
   /** Constants representing port IDs that devices are connected to */
