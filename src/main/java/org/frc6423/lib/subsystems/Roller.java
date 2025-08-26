@@ -9,6 +9,7 @@ package org.frc6423.lib.subsystems;
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.function.DoubleSupplier;
 
@@ -85,6 +86,22 @@ public class Roller extends SubsystemBase implements AutoCloseable {
    */
   protected Command runSpeed(double speedRpm) {
     return runSpeed(() -> speedRpm);
+  }
+
+  /**
+   * Hold rollers at current speed
+   *
+   * @return {@link Command}
+   */
+  protected Command holdSpeed() {
+    return Commands.sequence(
+        this.run(
+                () -> {
+                  var currentSpeed = hardware.getSpeedRpm();
+                  hardware.setSpeed(currentSpeed);
+                })
+            .until(() -> true),
+        this.run(() -> {}));
   }
 
   @Override
