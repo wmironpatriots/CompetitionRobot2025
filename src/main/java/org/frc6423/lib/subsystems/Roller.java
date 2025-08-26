@@ -13,7 +13,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.function.DoubleSupplier;
 
 /** Generic Roller Subsystem */
-public class Roller extends SubsystemBase {
+public class Roller extends SubsystemBase implements AutoCloseable {
   @Logged(name = "Roller Hardware Loggables")
   private final RollerIO hardware;
 
@@ -85,5 +85,10 @@ public class Roller extends SubsystemBase {
    */
   protected Command runSpeed(double speedRpm) {
     return runSpeed(() -> speedRpm);
+  }
+
+  @Override
+  public void close() throws Exception {
+    hardware.close();
   }
 }
