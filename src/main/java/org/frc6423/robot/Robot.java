@@ -6,7 +6,6 @@
 
 package org.frc6423.robot;
 
-import static edu.wpi.first.epilogue.Logged.Importance.INFO;
 import static edu.wpi.first.units.Units.Seconds;
 
 import edu.wpi.first.epilogue.Epilogue;
@@ -26,9 +25,6 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import org.frc6423.lib.drivers.CommandRobot;
 import org.frc6423.robot.Constants.Flags;
-import org.frc6423.robot.subsystems.arm.Arm;
-import org.frc6423.robot.subsystems.arm.ArmIOSim;
-import org.frc6423.robot.subsystems.arm.ArmState;
 
 /**
  * Declares the structure of the robot program (subsystems, commands, triggers, etc.).
@@ -43,8 +39,7 @@ public class Robot extends CommandRobot {
   private final CommandXboxController operatorController = new CommandXboxController(1);
 
   // * SUBSYSTEM INIT
-  @Logged(importance = INFO)
-  private final Arm arm = new Arm(new ArmIOSim());
+  /** Init subsytems here */
 
   // * ALERT INIT
   private final Alert batteryBrownout = new Alert("Battery voltage output low", AlertType.kWarning);
@@ -116,15 +111,10 @@ public class Robot extends CommandRobot {
   }
 
   /** Configure behavior during different match sections */
-  private void configureGameBehavior() {
-    arm.setDefaultCommand(arm.runState(ArmState.STOWED));
-  }
+  private void configureGameBehavior() {}
 
   /** Configure all Driver & Operator controller bindings */
-  private void configureBindings() {
-    driverController.b().whileTrue(arm.runState(ArmState.AVOIDING));
-    driverController.x().whileTrue(arm.runState(ArmState.INTAKING));
-  }
+  private void configureBindings() {}
 
   @Override
   protected Command getAutonCommand() {
