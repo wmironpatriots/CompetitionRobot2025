@@ -35,7 +35,7 @@ public class ArmPivot extends SubsystemBase implements AutoCloseable {
   /** CONSTANTS */
   public static final double PIVOT_GEARING = 50;
 
-  public static final MomentOfInertia MOI = KilogramSquareMeters.of(0.001);
+  public static final MomentOfInertia MOI = KilogramSquareMeters.of(0.23381);
   public static final Distance LENGTH = Inches.of(7.5);
 
   public static final Angle MIN_ANGLE = Degrees.of(-90);
