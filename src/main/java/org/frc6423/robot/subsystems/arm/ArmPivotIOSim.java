@@ -9,19 +9,16 @@ package org.frc6423.robot.subsystems.arm;
 import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
-import static org.frc6423.robot.subsystems.arm.Arm.*;
+import static org.frc6423.robot.subsystems.arm.ArmPivot.*;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-public class ArmIOSim implements ArmIO {
+public class ArmPivotIOSim implements ArmPivotIO {
   private final DCMotor pivotModel = DCMotor.getKrakenX60Foc(1);
   // TODO stddevs
   private final SingleJointedArmSim pivotSim =
@@ -35,87 +32,53 @@ public class ArmIOSim implements ArmIO {
           false,
           0);
 
-  private final DCMotor rollerModel = DCMotor.getKrakenX60(1);
-  // TODO stddevs
-  private final DCMotorSim rollerSim =
-      new DCMotorSim(
-          LinearSystemId.createDCMotorSystem(pivotModel, 0.01, ROLLER_GEARING), rollerModel);
-
   private double pivotAppliedVolts;
-  private double rollerAppliedVolts;
 
   private final ProfiledPIDController pivotFeedback =
       new ProfiledPIDController(10, 0.0, 0.0, new TrapezoidProfile.Constraints(3.5, 3.5));
 
-  private final SimpleMotorFeedforward rollerFeedforward =
-      new SimpleMotorFeedforward(0.0, 0.0, 0.0);
-
-  public ArmIOSim() {
+  public ArmPivotIOSim() {
     SmartDashboard.putData(pivotFeedback);
   }
 
   @Override
   public void periodic() {
     pivotSim.setInputVoltage(pivotAppliedVolts);
-    rollerSim.setInputVoltage(rollerAppliedVolts);
-
     pivotSim.update(0.02);
-    rollerSim.update(0.02);
   }
 
   @Override
-  public double getPivotAngleRads() {
+  public double getAngleRads() {
     return pivotSim.getAngleRads();
   }
 
   @Override
-  public double getPivotSetpointAngleRads() {
+  public double getSetpointAngleRads() {
     return pivotFeedback.getSetpoint().position;
   }
 
   @Override
-  public double getPivotStatorCurrentAmps() {
+  public double getStatorCurrentAmps() {
     return pivotSim.getCurrentDrawAmps();
   }
 
   @Override
-  public double getRollerSpeedRpm() {
-    return rollerSim.getAngularVelocityRPM();
-  }
+  public void resetEncoder(double poseRads) {}
 
   @Override
-  public double getRollerStatorCurrentAmps() {
-    return rollerSim.getCurrentDrawAmps();
-  }
-
-  @Override
-  public void resetPivotEncoder(double poseRads) {}
-
-  @Override
-  public void runPivotVolts(double volts) {
+  public void setVolts(double volts) {
     pivotAppliedVolts = MathUtil.clamp(volts, -12.0, 12.0);
   }
 
   @Override
-  public void runPivotAngle(double angleRads) {
+  public void setAngle(double angleRads) {
     // Clamp value within range
     angleRads = MathUtil.clamp(angleRads, 0.0, MAX_ANGLE.in(Radians));
 
     // Calculate fb output
-    var fbOut = pivotFeedback.calculate(getPivotAngleRads(), angleRads);
+    var fbOut = pivotFeedback.calculate(getAngleRads(), angleRads);
 
-    runPivotVolts(fbOut);
-  }
-
-  @Override
-  public void runRollerVolts(double volts) {
-    rollerAppliedVolts = MathUtil.clamp(volts, -12.0, 12.0);
-  }
-
-  @Override
-  public void runRollerSpeed(double speedRpm) {
-    var ffOut = rollerFeedforward.calculate(speedRpm);
-    runRollerVolts(ffOut);
+    setVolts(fbOut);
   }
 
   @Override
