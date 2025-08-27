@@ -7,9 +7,11 @@
 package org.frc6423.robot.subsystems.superstructure.elevator;
 
 import static edu.wpi.first.units.Units.Centimeters;
+import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
+import static edu.wpi.first.units.Units.Pounds;
 
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.MathUtil;
@@ -18,6 +20,7 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearAcceleration;
 import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -26,11 +29,14 @@ import java.util.function.DoubleSupplier;
 /** Elevator Subsystem */
 public class Elevator extends SubsystemBase {
   /** CONSTANTS */
-  // TODO
-  public static final double GEAR_RATIO = 0.0;
+  public static final double GEAR_REDUCTION = 3 / 1;
 
-  // TODO
-  public static final Distance MAX_EXTENSION_HEIGHT = Meters.of(0.0);
+  public static final Distance DRUM_RADIUS =
+      Inches.of(
+          1.7 / 2); // The drum radius is just 1/2 of the pitch diameter of the elevator sprocket
+  public static final Mass LIFT_MASS = Pounds.of(0.0);
+
+  public static final Distance MAX_EXTENSION_HEIGHT = Meters.of(24);
   public static final Distance TOLERANCE = Centimeters.of(5);
 
   public static final LinearVelocity MAX_VELOCITY = MetersPerSecond.of(4.5);
