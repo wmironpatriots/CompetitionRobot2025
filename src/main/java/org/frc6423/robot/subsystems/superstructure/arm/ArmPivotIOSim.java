@@ -18,6 +18,7 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
+/** Simulated {@link ArmPivotIOReal} */
 public class ArmPivotIOSim implements ArmPivotIO {
   private final DCMotor pivotModel = DCMotor.getKrakenX60Foc(1);
   // TODO stddevs
