@@ -35,7 +35,7 @@ public class ElevatorIOSim implements ElevatorIO {
 
   private double appliedVolts;
 
-  private final ElevatorFeedforward feedforward = new ElevatorFeedforward(0.0, 0.1265, 0.8, 0.0);
+  private final ElevatorFeedforward feedforward = new ElevatorFeedforward(0.0, 0.1265, 0.4, 0.0);
   private final ProfiledPIDController feedback =
       new ProfiledPIDController(15.0, 0.0, 0.0, new TrapezoidProfile.Constraints(0.0, 0.0));
 
@@ -101,7 +101,8 @@ public class ElevatorIOSim implements ElevatorIO {
 
     // Give feedback controller new accel
     feedback.setConstraints(
-        new TrapezoidProfile.Constraints(MAX_VELOCITY.in(MetersPerSecond), accelerationMpsSqrd));
+        new TrapezoidProfile.Constraints(
+            MAX_VELOCITY.in(MetersPerSecond) / 2, accelerationMpsSqrd));
     // Calculate next feedback setpoint
     var fbOut = feedback.calculate(getParentPoseMeters(), poseMeters);
     // Get next velocity
