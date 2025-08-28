@@ -12,10 +12,12 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import static org.frc6423.robot.subsystems.superstructure.elevator.Elevator.*;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /** Simulated {@link ElevatorIOReal} */
 public class ElevatorIOSim implements ElevatorIO {
@@ -33,10 +35,13 @@ public class ElevatorIOSim implements ElevatorIO {
 
   private double appliedVolts;
 
+  private final ElevatorFeedforward feedforward = new ElevatorFeedforward(0.0, 0.1265, 0.8, 0.0);
   private final ProfiledPIDController feedback =
-      new ProfiledPIDController(0.0, 0.0, 0.0, new TrapezoidProfile.Constraints(0.0, 0.0));
+      new ProfiledPIDController(15.0, 0.0, 0.0, new TrapezoidProfile.Constraints(0.0, 0.0));
 
-  public ElevatorIOSim() {}
+  public ElevatorIOSim() {
+    SmartDashboard.putData(feedback);
+  }
 
   @Override
   public void periodic() {
@@ -91,12 +96,21 @@ public class ElevatorIOSim implements ElevatorIO {
   public void setPose(double poseMeters, double accelerationMpsSqrd) {
     // Clamp pose in range
     poseMeters = MathUtil.clamp(poseMeters, 0.0, MAX_EXTENSION_HEIGHT.in(Meters));
-    // Set new accel
+    // Get current setpoint velocity
+    var currentVel = feedback.getSetpoint().velocity;
+
+    // Give feedback controller new accel
     feedback.setConstraints(
         new TrapezoidProfile.Constraints(MAX_VELOCITY.in(MetersPerSecond), accelerationMpsSqrd));
-    var ffOut = feedback.calculate(getParentPoseMeters(), poseMeters);
+    // Calculate next feedback setpoint
+    var fbOut = feedback.calculate(getParentPoseMeters(), poseMeters);
+    // Get next velocity
+    var nextVel = feedback.getSetpoint().velocity;
 
-    setVolts(ffOut);
+    // Calculate feedforward velocity output
+    var ffOut = feedforward.calculateWithVelocities(currentVel, nextVel);
+
+    setVolts(ffOut + fbOut);
   }
 
   @Override
