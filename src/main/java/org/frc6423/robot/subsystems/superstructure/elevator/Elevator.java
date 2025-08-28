@@ -17,10 +17,17 @@ import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearAcceleration;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Mass;
+import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
+import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
+import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.util.Color;
+import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -28,19 +35,20 @@ import java.util.function.DoubleSupplier;
 
 /** Elevator Subsystem */
 public class Elevator extends SubsystemBase {
-  /** CONSTANTS */
+  // * CONSTANTS
   public static final double GEAR_REDUCTION = 3 / 1;
 
-  public static final Distance DRUM_RADIUS =
-      Inches.of(
-          1.7 / 2); // The drum radius is just 1/2 of the pitch diameter of the elevator sprocket
-  public static final Mass LIFT_MASS = Pounds.of(0.0);
+  /** The radius of the sproket on the elevator's driven shaft */
+  public static final Distance DRUM_RADIUS = Inches.of(1.757 / 2);
 
-  public static final Distance MAX_EXTENSION_HEIGHT = Meters.of(24);
-  public static final Distance TOLERANCE = Centimeters.of(5);
+  public static final double SENSOR_TO_MECH_RATIO = 3 / (2 * Math.PI * DRUM_RADIUS.in(Meters));
+  public static final Mass LIFT_MASS = Pounds.of(6.0); // TODO calculate actual value
+
+  public static final Distance MAX_EXTENSION_HEIGHT = Inches.of(24);
+  public static final Distance TOLERANCE = Inches.of(1.5);
 
   public static final LinearVelocity MAX_VELOCITY = MetersPerSecond.of(4.5);
-  public static final LinearAcceleration MAX_ACCELERATION = MetersPerSecondPerSecond.of(10.0);
+  public static final LinearAcceleration FAST_ACCELERATION = MetersPerSecondPerSecond.of(10.0);
   public static final LinearAcceleration SLOW_ACCELERATION = MetersPerSecondPerSecond.of(5.0);
 
   @Logged(name = "Elevator Hardware Loggables")
@@ -53,8 +61,28 @@ public class Elevator extends SubsystemBase {
 
   private boolean isZeroed = false;
 
+  // Visualizer
+  private final Mechanism2d mech2d =
+      new Mechanism2d(
+          MAX_EXTENSION_HEIGHT.in(Centimeters), MAX_EXTENSION_HEIGHT.in(Centimeters) * 2 + 10);
+  private final MechanismRoot2d baseRoot =
+      mech2d.getRoot("base", MAX_EXTENSION_HEIGHT.in(Centimeters) / 2, 0.0);
+  private final MechanismRoot2d stageRoot =
+      mech2d.getRoot("stageRoot", (MAX_EXTENSION_HEIGHT.in(Centimeters) / 2) - 1, 0.0);
+  private final MechanismRoot2d carriageRoot =
+      mech2d.getRoot("carriageRoot", (MAX_EXTENSION_HEIGHT.in(Centimeters) / 2) - 2, 0.0);
+
   public Elevator(ElevatorIO hardware) {
     this.hardware = hardware;
+
+    baseRoot.append(
+        new MechanismLigament2d("base", 81.43936976, 90.0, 10.0, new Color8Bit(Color.kRed)));
+    stageRoot.append(
+        new MechanismLigament2d("stage", 83.82, 90.0, 7.0, new Color8Bit(Color.kYellow)));
+    carriageRoot.append(
+        new MechanismLigament2d("carriage", 17.78, 90.0, 4.5, new Color8Bit(Color.kGreen)));
+
+    SmartDashboard.putData("Elevator Visualizer", mech2d);
   }
 
   @Override
@@ -62,6 +90,11 @@ public class Elevator extends SubsystemBase {
     hardware.periodic();
 
     filteredCurrent = currentFilter.calculate(hardware.getParentStatorCurrentAmps());
+
+    stageRoot.setPosition(
+        (MAX_EXTENSION_HEIGHT.in(Centimeters) / 2) - 2, getStageHeight().in(Centimeters));
+    carriageRoot.setPosition(
+        (MAX_EXTENSION_HEIGHT.in(Centimeters) / 2) - 4, getCarriageHeight().in(Centimeters));
   }
 
   /**
@@ -81,16 +114,34 @@ public class Elevator extends SubsystemBase {
         hardware.getSetpointPoseMeters(), hardware.getParentPoseMeters(), TOLERANCE.in(Meters));
   }
 
-  // TODO
-  @Logged(name = "Carriage (Pose3d)")
-  public Pose3d getCarriagePose3d() {
-    return Pose3d.kZero;
+  /**
+   * @return {@link Distance} representing carriage height
+   */
+  public Distance getCarriageHeight() {
+    return Meters.of(hardware.getParentPoseMeters()).times(2);
   }
 
-  // TODO
-  @Logged(name = "First Stage (Pose3d)")
-  public Pose3d getFirstStagePose3d() {
-    return Pose3d.kZero;
+  /**
+   * @return {@link Pose3d} representing the pose of the carriage
+   */
+  @Logged(name = "Carriage (Pose3d)")
+  public Pose3d getCarriagePose3d() {
+    return new Pose3d(Meters.of(0.0), Meters.of(0.0), getStageHeight().times(2), Rotation3d.kZero);
+  }
+
+  /**
+   * @return {@link Distance} representing stage height
+   */
+  public Distance getStageHeight() {
+    return Meters.of(hardware.getParentPoseMeters());
+  }
+
+  /**
+   * @return {@link Pose3d} representing the pose of the first stage
+   */
+  @Logged(name = "Stage (Pose3d)")
+  public Pose3d getFirstPose3d() {
+    return new Pose3d(Meters.of(0.0), Meters.of(0.0), getStageHeight(), Rotation3d.kZero);
   }
 
   /**
@@ -113,32 +164,33 @@ public class Elevator extends SubsystemBase {
   /**
    * Run elevator to specified extension
    *
-   * @param extension {@link Extension} representing desired extension
+   * @param extension {@link ElevatorExtension} representing desired extension
    * @return {@link Command}
    */
-  public Command runExtension(Distance extension) {
+  public Command runExtension(ElevatorExtension extension) {
     return this.run(
         () ->
-            hardware.setPose(extension.in(Meters), MAX_ACCELERATION.in(MetersPerSecondPerSecond)));
+            hardware.setPose(
+                extension.height.in(Meters), FAST_ACCELERATION.in(MetersPerSecondPerSecond)));
   }
 
   /**
    * Run elevator to specified extension
    *
-   * @param extension desired extension in meters
+   * @param height desired extension in meters
    * @return {@link Command}
    */
   public Command runExtension(DoubleSupplier extensionMeters) {
     return this.run(
         () ->
             hardware.setPose(
-                extensionMeters.getAsDouble(), MAX_ACCELERATION.in(MetersPerSecondPerSecond)));
+                extensionMeters.getAsDouble(), FAST_ACCELERATION.in(MetersPerSecondPerSecond)));
   }
 
   /**
    * Run elevator to specified extension
    *
-   * @param extension desired extension in meters
+   * @param height desired extension in meters
    * @return {@link Command}
    */
   public Command runExtension(double extensionMeters) {
@@ -148,13 +200,14 @@ public class Elevator extends SubsystemBase {
   /**
    * Run elevator to specified extension
    *
-   * @param extension {@link Extension} representing desired extension
+   * @param extension {@link ElevatorExtension} representing desired extension
    * @return {@link Command}
    */
-  public Command runSlowExtension(Distance extension) {
+  public Command runSlowExtension(ElevatorExtension extension) {
     return this.run(
         () ->
-            hardware.setPose(extension.in(Meters), SLOW_ACCELERATION.in(MetersPerSecondPerSecond)));
+            hardware.setPose(
+                extension.height.in(Meters), SLOW_ACCELERATION.in(MetersPerSecondPerSecond)));
   }
 
   /**
