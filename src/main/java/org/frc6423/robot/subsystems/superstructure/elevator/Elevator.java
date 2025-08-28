@@ -29,7 +29,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.function.DoubleSupplier;
 
@@ -48,8 +47,7 @@ public class Elevator extends SubsystemBase {
   public static final Distance TOLERANCE = Inches.of(1.5);
 
   public static final LinearVelocity MAX_VELOCITY = MetersPerSecond.of(4.5);
-  public static final LinearAcceleration FAST_ACCELERATION = MetersPerSecondPerSecond.of(10.0);
-  public static final LinearAcceleration SLOW_ACCELERATION = MetersPerSecondPerSecond.of(5.0);
+  public static final LinearAcceleration MAX_ACCELERATION = MetersPerSecondPerSecond.of(10.0);
 
   @Logged(name = "Elevator Hardware Loggables")
   private final ElevatorIO hardware;
@@ -162,92 +160,42 @@ public class Elevator extends SubsystemBase {
   }
 
   /**
-   * Run elevator to specified extension
+   * Run elevator to specified extension height
    *
-   * @param extension {@link ElevatorExtension} representing desired extension
+   * @param extension {@link ElevatorExtension} representing desired extension height
    * @return {@link Command}
    */
   public Command runExtension(ElevatorExtension extension) {
-    return this.run(
-        () ->
-            hardware.setPose(
-                extension.height.in(Meters), FAST_ACCELERATION.in(MetersPerSecondPerSecond)));
+    return runExtension(extension.height);
   }
 
   /**
-   * Run elevator to specified extension
+   * Run elevator to specified extension height
    *
-   * @param height desired extension in meters
+   * @param extension {@link Distance} representing desired extension height
+   * @return
+   */
+  public Command runExtension(Distance extension) {
+    return this.run(() -> hardware.setPose(extension.in(Meters)));
+  }
+
+  /**
+   * Run elevator to specified extension height
+   *
+   * @param height desired extension height in meters
    * @return {@link Command}
    */
   public Command runExtension(DoubleSupplier extensionMeters) {
-    return this.run(
-        () ->
-            hardware.setPose(
-                extensionMeters.getAsDouble(), FAST_ACCELERATION.in(MetersPerSecondPerSecond)));
+    return this.run(() -> hardware.setPose(extensionMeters.getAsDouble()));
   }
 
   /**
-   * Run elevator to specified extension
+   * Run elevator to specified extension height
    *
-   * @param height desired extension in meters
+   * @param height desired extension height in meters
    * @return {@link Command}
    */
   public Command runExtension(double extensionMeters) {
     return runExtension(() -> extensionMeters);
-  }
-
-  /**
-   * Run elevator to specified extension
-   *
-   * @param extension {@link ElevatorExtension} representing desired extension
-   * @return {@link Command}
-   */
-  public Command runSlowExtension(ElevatorExtension extension) {
-    return this.run(
-        () ->
-            hardware.setPose(
-                extension.height.in(Meters), SLOW_ACCELERATION.in(MetersPerSecondPerSecond)));
-  }
-
-  /**
-   * Run elevator to specified extension
-   *
-   * @param extension desired extension in meters
-   * @return {@link Command}
-   */
-  public Command runSlowExtension(DoubleSupplier extension) {
-    return this.run(
-        () ->
-            hardware.setPose(
-                extension.getAsDouble(), SLOW_ACCELERATION.in(MetersPerSecondPerSecond)));
-  }
-
-  /**
-   * Run elevator to specified extension
-   *
-   * @param extension desired extension in meters
-   * @return {@link Command}
-   */
-  public Command runSlowExtension(double extension) {
-    return runSlowExtension(() -> extension);
-  }
-
-  /**
-   * Hold elevator at current extension
-   *
-   * @return {@link Command}
-   */
-  @Deprecated
-  public Command holdExtension() {
-    return Commands.sequence(
-        this.run(
-                () -> {
-                  var currentPose = hardware.getParentPoseMeters();
-
-                  hardware.setPose(currentPose, 0.0);
-                })
-            .until(() -> true),
-        this.run(() -> {}));
   }
 }
