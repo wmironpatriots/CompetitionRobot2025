@@ -238,13 +238,14 @@ public class Elevator extends SubsystemBase {
    *
    * @return {@link Command}
    */
+  @Deprecated
   public Command holdExtension() {
     return Commands.sequence(
         this.run(
                 () -> {
                   var currentPose = hardware.getParentPoseMeters();
 
-                  hardware.setPose(currentPose, SLOW_ACCELERATION.in(MetersPerSecondPerSecond));
+                  hardware.setPose(currentPose, 0.0);
                 })
             .until(() -> true),
         this.run(() -> {}));
