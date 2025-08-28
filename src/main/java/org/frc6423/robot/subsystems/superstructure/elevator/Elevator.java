@@ -33,7 +33,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.function.DoubleSupplier;
 
 /** Elevator Subsystem */
-public class Elevator extends SubsystemBase {
+public class Elevator extends SubsystemBase implements AutoCloseable {
   // * CONSTANTS
   public static final double GEAR_REDUCTION = 3 / 1;
 
@@ -197,5 +197,10 @@ public class Elevator extends SubsystemBase {
    */
   public Command runExtension(double extensionMeters) {
     return runExtension(() -> extensionMeters);
+  }
+
+  @Override
+  public void close() throws Exception {
+    hardware.close();
   }
 }
