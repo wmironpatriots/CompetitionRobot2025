@@ -35,18 +35,28 @@ import java.util.function.DoubleSupplier;
 /** Elevator Subsystem */
 public class Elevator extends SubsystemBase implements AutoCloseable {
   // * CONSTANTS
+  /** Gear ratio of the elevator gearbox */
   public static final double GEAR_REDUCTION = 3 / 1;
 
   /** The radius of the sproket on the elevator's driven shaft */
   public static final Distance DRUM_RADIUS = Inches.of(1.757 / 2);
 
+  /** The ratio of motor revs over output extension in meters */
   public static final double SENSOR_TO_MECH_RATIO = 3 / (2 * Math.PI * DRUM_RADIUS.in(Meters));
+
+  /** Combined mass lifted by elevator gearbox */
   public static final Mass LIFT_MASS = Pounds.of(6.0); // TODO calculate actual value
 
+  /** The highest feasible extension height */
   public static final Distance MAX_EXTENSION_HEIGHT = Inches.of(24);
+
+  /** The max allowable height extension error */
   public static final Distance TOLERANCE = Inches.of(1.5);
 
+  /** The velocity limit of the elevator's trapezoid profile */
   public static final LinearVelocity MAX_VELOCITY = MetersPerSecond.of(4.5);
+
+  /** The acceleration of the elevator's trapezoid profile */
   public static final LinearAcceleration MAX_ACCELERATION = MetersPerSecondPerSecond.of(10.0);
 
   @Logged(name = "Elevator Hardware Loggables")
@@ -89,6 +99,7 @@ public class Elevator extends SubsystemBase implements AutoCloseable {
 
     filteredCurrent = currentFilter.calculate(hardware.getParentStatorCurrentAmps());
 
+    /** Set visualizer poses */
     stageRoot.setPosition(
         (MAX_EXTENSION_HEIGHT.in(Centimeters) / 2) - 2, getStageHeight().in(Centimeters));
     carriageRoot.setPosition(
@@ -173,7 +184,7 @@ public class Elevator extends SubsystemBase implements AutoCloseable {
    * Run elevator to specified extension height
    *
    * @param extension {@link Distance} representing desired extension height
-   * @return
+   * @return {@link Command}
    */
   public Command runExtension(Distance extension) {
     return this.run(() -> hardware.setPose(extension.in(Meters)));
