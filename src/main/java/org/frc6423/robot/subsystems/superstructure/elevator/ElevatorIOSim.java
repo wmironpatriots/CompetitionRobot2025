@@ -8,7 +8,7 @@ package org.frc6423.robot.subsystems.superstructure.elevator;
 
 import static edu.wpi.first.units.Units.Kilograms;
 import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static org.frc6423.robot.subsystems.superstructure.elevator.Elevator.*;
 
 import edu.wpi.first.math.MathUtil;
@@ -37,7 +37,7 @@ public class ElevatorIOSim implements ElevatorIO {
 
   private final ElevatorFeedforward feedforward = new ElevatorFeedforward(0.0, 0.1265, 0.4, 0.0);
   private final ProfiledPIDController feedback =
-      new ProfiledPIDController(15.0, 0.0, 0.0, new TrapezoidProfile.Constraints(0.0, 0.0));
+      new ProfiledPIDController(15.0, 0.0, 0.0, new TrapezoidProfile.Constraints(2.25, 10.0));
 
   public ElevatorIOSim() {
     SmartDashboard.putData(feedback);
@@ -92,17 +92,14 @@ public class ElevatorIOSim implements ElevatorIO {
     appliedVolts = MathUtil.clamp(volts, -12.0, 12.0);
   }
 
-  @Override
-  public void setPose(double poseMeters, double accelerationMpsSqrd) {
+  public void setPose(double poseMeters, double accelMpsSqrd) {
     // Clamp pose in range
     poseMeters = MathUtil.clamp(poseMeters, 0.0, MAX_EXTENSION_HEIGHT.in(Meters));
     // Get current setpoint velocity
     var currentVel = feedback.getSetpoint().velocity;
 
     // Give feedback controller new accel
-    feedback.setConstraints(
-        new TrapezoidProfile.Constraints(
-            MAX_VELOCITY.in(MetersPerSecond) / 2, accelerationMpsSqrd));
+    feedback.setConstraints(new TrapezoidProfile.Constraints(2.25, accelMpsSqrd));
     // Calculate next feedback setpoint
     var fbOut = feedback.calculate(getParentPoseMeters(), poseMeters);
     // Get next velocity
@@ -111,7 +108,13 @@ public class ElevatorIOSim implements ElevatorIO {
     // Calculate feedforward velocity output
     var ffOut = feedforward.calculateWithVelocities(currentVel, nextVel);
 
+    // Combine output
     setVolts(ffOut + fbOut);
+  }
+
+  @Override
+  public void setPose(double poseMeters) {
+    setPose(poseMeters, MAX_ACCELERATION.in(MetersPerSecondPerSecond));
   }
 
   @Override
