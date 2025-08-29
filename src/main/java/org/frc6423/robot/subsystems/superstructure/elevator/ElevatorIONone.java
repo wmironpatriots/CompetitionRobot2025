@@ -55,9 +55,6 @@ public class ElevatorIONone implements ElevatorIO {
   public void setVolts(double volts) {}
 
   @Override
-  public void setPose(double poseMeters, double accelMpsSqrd) {}
-
-  @Override
   public void setPose(double poseMeters) {}
 
   @Override

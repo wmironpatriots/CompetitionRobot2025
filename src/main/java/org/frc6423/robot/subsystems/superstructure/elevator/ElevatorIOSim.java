@@ -8,7 +8,6 @@ package org.frc6423.robot.subsystems.superstructure.elevator;
 
 import static edu.wpi.first.units.Units.Kilograms;
 import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static org.frc6423.robot.subsystems.superstructure.elevator.Elevator.*;
 
 import edu.wpi.first.math.MathUtil;
@@ -92,14 +91,13 @@ public class ElevatorIOSim implements ElevatorIO {
     appliedVolts = MathUtil.clamp(volts, -12.0, 12.0);
   }
 
-  public void setPose(double poseMeters, double accelMpsSqrd) {
+  @Override
+  public void setPose(double poseMeters) {
     // Clamp pose in range
     poseMeters = MathUtil.clamp(poseMeters, 0.0, MAX_EXTENSION_HEIGHT.in(Meters));
     // Get current setpoint velocity
     var currentVel = feedback.getSetpoint().velocity;
 
-    // Give feedback controller new accel
-    feedback.setConstraints(new TrapezoidProfile.Constraints(2.25, accelMpsSqrd));
     // Calculate next feedback setpoint
     var fbOut = feedback.calculate(getParentPoseMeters(), poseMeters);
     // Get next velocity
@@ -110,11 +108,6 @@ public class ElevatorIOSim implements ElevatorIO {
 
     // Combine output
     setVolts(ffOut + fbOut);
-  }
-
-  @Override
-  public void setPose(double poseMeters) {
-    setPose(poseMeters, MAX_ACCELERATION.in(MetersPerSecondPerSecond));
   }
 
   @Override

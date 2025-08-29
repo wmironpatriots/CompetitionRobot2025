@@ -70,14 +70,6 @@ public interface ElevatorIO extends AutoCloseable {
   public void setVolts(double volts);
 
   /**
-   * Set parent/child motors position setpoint /w acceleration setpoint
-   *
-   * @param poseMeters desired position setpoint in meters
-   * @param accelMpsSqrd desired acceleration setpoint in meters per second per second
-   */
-  public void setPose(double poseMeters, double accelMpsSqrd);
-
-  /**
    * Set parent/child motors position setpoint
    *
    * @param poseMeters desired position setpoint in meters
