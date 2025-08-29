@@ -6,11 +6,13 @@
 
 package org.frc6423.robot.subsystems.superstructure.elevator;
 
+import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static org.frc6423.robot.subsystems.superstructure.elevator.Elevator.CANBUS;
 import static org.frc6423.robot.subsystems.superstructure.elevator.Elevator.CHILD_MOTOR_ID;
 import static org.frc6423.robot.subsystems.superstructure.elevator.Elevator.MAX_ACCELERATION;
+import static org.frc6423.robot.subsystems.superstructure.elevator.Elevator.MAX_EXTENSION_HEIGHT;
 import static org.frc6423.robot.subsystems.superstructure.elevator.Elevator.MAX_VELOCITY;
 import static org.frc6423.robot.subsystems.superstructure.elevator.Elevator.PARENT_MOTOR_ID;
 import static org.frc6423.robot.subsystems.superstructure.elevator.Elevator.SENSOR_TO_MECH_RATIO;
@@ -49,10 +51,13 @@ public class ElevatorIOReal implements ElevatorIO {
     conf.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     conf.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
 
-    conf.CurrentLimits.StatorCurrentLimit = 80.0;
+    conf.HardwareLimitSwitch.ForwardLimitAutosetPositionEnable = true;
+    conf.HardwareLimitSwitch.ForwardLimitAutosetPositionValue = MAX_EXTENSION_HEIGHT.in(Meters);
+
     conf.CurrentLimits.StatorCurrentLimitEnable = true;
-    conf.CurrentLimits.SupplyCurrentLimit = 40.0;
+    conf.CurrentLimits.StatorCurrentLimit = 80.0;
     conf.CurrentLimits.SupplyCurrentLimitEnable = true;
+    conf.CurrentLimits.SupplyCurrentLimit = 40.0;
 
     conf.Feedback.SensorToMechanismRatio = SENSOR_TO_MECH_RATIO;
     conf.ClosedLoopRamps.TorqueClosedLoopRampPeriod = 0.1;
