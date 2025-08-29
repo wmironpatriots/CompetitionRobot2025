@@ -173,10 +173,10 @@ public class Elevator extends SubsystemBase implements AutoCloseable {
   /**
    * Run elevator to specified extension height
    *
-   * @param extension {@link ElevatorExtension} representing desired extension height
+   * @param extension {@link ElevatorState} representing desired extension height
    * @return {@link Command}
    */
-  public Command runExtension(ElevatorExtension extension) {
+  public Command runExtension(ElevatorState extension) {
     return runExtension(extension.height);
   }
 

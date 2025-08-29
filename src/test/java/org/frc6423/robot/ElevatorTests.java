@@ -17,8 +17,8 @@ import edu.wpi.first.wpilibj.Timer;
 import java.util.ArrayList;
 import java.util.stream.Stream;
 import org.frc6423.robot.subsystems.superstructure.elevator.Elevator;
-import org.frc6423.robot.subsystems.superstructure.elevator.ElevatorExtension;
 import org.frc6423.robot.subsystems.superstructure.elevator.ElevatorIOSim;
+import org.frc6423.robot.subsystems.superstructure.elevator.ElevatorState;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.RepeatedTest;
@@ -66,13 +66,13 @@ class ElevatorTests {
   }
 
   /**
-   * Run all {@link ElevatorExtension}
+   * Run all {@link ElevatorState}
    *
-   * @param extension {@link ElevatorExtension}
+   * @param extension {@link ElevatorState}
    */
   @ParameterizedTest
   @MethodSource("provideExtensionHeights")
-  public void runExtensions(ElevatorExtension extension) {
+  public void runExtensions(ElevatorState extension) {
     runToCompletion(
         elevator
             .runExtension(extension)
@@ -81,11 +81,11 @@ class ElevatorTests {
   }
 
   /**
-   * @return {@link Stream} of all {@link ElevatorExtension}
+   * @return {@link Stream} of all {@link ElevatorState}
    */
   private static Stream<Arguments> provideExtensionHeights() {
     ArrayList<Arguments> extensions = new ArrayList<>();
-    for (var extension : ElevatorExtension.values()) {
+    for (var extension : ElevatorState.values()) {
       extensions.add(Arguments.of(extension));
     }
 

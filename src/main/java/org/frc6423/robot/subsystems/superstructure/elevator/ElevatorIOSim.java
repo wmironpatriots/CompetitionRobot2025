@@ -16,7 +16,6 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /** Simulated {@link ElevatorIOReal} */
 public class ElevatorIOSim implements ElevatorIO {
@@ -38,9 +37,7 @@ public class ElevatorIOSim implements ElevatorIO {
   private final ProfiledPIDController feedback =
       new ProfiledPIDController(15.0, 0.0, 0.0, new TrapezoidProfile.Constraints(2.25, 10.0));
 
-  public ElevatorIOSim() {
-    SmartDashboard.putData(feedback);
-  }
+  public ElevatorIOSim() {}
 
   @Override
   public void periodic() {

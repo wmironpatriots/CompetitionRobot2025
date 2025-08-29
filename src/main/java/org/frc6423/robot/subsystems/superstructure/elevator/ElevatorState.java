@@ -12,7 +12,7 @@ import static edu.wpi.first.units.Units.Meters;
 import edu.wpi.first.units.measure.Distance;
 
 /** Represents an extension height the {@link Elevator} subsystem can be in */
-public enum ElevatorExtension {
+public enum ElevatorState {
   /** Resting state */
   STOWED(Meters.of(0.0)),
   /** L2 height */
@@ -24,7 +24,7 @@ public enum ElevatorExtension {
 
   public final Distance height;
 
-  private ElevatorExtension(Distance height) {
+  private ElevatorState(Distance height) {
     this.height = height;
   }
 }
