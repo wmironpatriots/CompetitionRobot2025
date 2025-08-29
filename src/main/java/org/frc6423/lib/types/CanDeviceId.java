@@ -6,6 +6,7 @@
 
 package org.frc6423.lib.types;
 
+@Deprecated
 public class CanDeviceId {
   private final String busName;
   private final int canId;
