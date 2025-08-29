@@ -26,20 +26,31 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.function.DoubleSupplier;
 
 /** Pivot subsystem-component of the {@link Arm} Subsystem */
 public class ArmPivot extends SubsystemBase implements AutoCloseable {
-  /** CONSTANTS */
-  public static final double PIVOT_GEARING = 50;
+  // * CONSTANTS
+  public static final String CANBUS = "RIO";
+  public static final int MOTOR_ID = 14;
 
+  /** Gear ratio of the pivot gearbox */
+  public static final double GEAR_REDUCTION = 50;
+
+  /** Moment of Inertia of the arm around the pivot */
   public static final MomentOfInertia MOI = KilogramSquareMeters.of(0.23381);
+
+  /** Length of the arm */
   public static final Distance LENGTH = Inches.of(7.5);
 
+  /** The smallest feasible angle */
   public static final Angle MIN_ANGLE = Degrees.of(-90);
+
+  /** The largest feasible angle */
   public static final Angle MAX_ANGLE = Degrees.of(90);
+
+  /** The max allowable angle error */
   public static final Angle TOLERANCE = Degrees.of(1.5);
 
   @Logged(name = "Arm Pivot Hardware Loggables")
@@ -52,11 +63,12 @@ public class ArmPivot extends SubsystemBase implements AutoCloseable {
 
   private boolean isZeroed = false;
 
-  private final Mechanism2d canvas =
+  // Visualizer
+  private final Mechanism2d mech2d =
       new Mechanism2d(LENGTH.in(Centimeters), LENGTH.in(Centimeters) * 2);
   private final MechanismRoot2d root =
-      canvas.getRoot("pivot", LENGTH.in(Centimeters), LENGTH.in(Centimeters));
-  private final MechanismLigament2d visualizer =
+      mech2d.getRoot("pivot", LENGTH.in(Centimeters), LENGTH.in(Centimeters));
+  private final MechanismLigament2d arm =
       root.append(
           new MechanismLigament2d(
               "arm", LENGTH.in(Centimeters), 0.0, 10, new Color8Bit(Color.kAliceBlue)));
@@ -64,7 +76,7 @@ public class ArmPivot extends SubsystemBase implements AutoCloseable {
   public ArmPivot(ArmPivotIO hardware) {
     this.hardware = hardware;
 
-    SmartDashboard.putData("ArmVisualizer", canvas);
+    SmartDashboard.putData("ArmVisualizer", mech2d);
   }
 
   @Override
@@ -73,7 +85,7 @@ public class ArmPivot extends SubsystemBase implements AutoCloseable {
 
     filteredPivotCurrent = pivotCurrentFilter.calculate(hardware.getStatorCurrentAmps());
 
-    visualizer.setAngle(
+    arm.setAngle(
         Rotation2d.fromRadians(hardware.getAngleRads()).unaryMinus().rotateBy(Rotation2d.k180deg));
   }
 
@@ -140,22 +152,6 @@ public class ArmPivot extends SubsystemBase implements AutoCloseable {
    */
   public Command runAngle(double angleRads) {
     return runAngle(() -> angleRads);
-  }
-
-  /**
-   * Hold arm at current angle
-   *
-   * @return {@link Command}
-   */
-  public Command holdAngle() {
-    return Commands.sequence(
-        this.run(
-                () -> {
-                  var currentAngle = hardware.getAngleRads();
-                  hardware.setAngle(currentAngle);
-                })
-            .until(() -> true),
-        this.run(() -> {}));
   }
 
   @Override

@@ -21,11 +21,10 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 /** Simulated {@link ArmPivotIOReal} */
 public class ArmPivotIOSim implements ArmPivotIO {
   private final DCMotor pivotModel = DCMotor.getKrakenX60Foc(1);
-  // TODO stddevs
   private final SingleJointedArmSim pivotSim =
       new SingleJointedArmSim(
           pivotModel,
-          PIVOT_GEARING,
+          GEAR_REDUCTION,
           MOI.in(KilogramSquareMeters),
           LENGTH.in(Meters),
           MIN_ANGLE.in(Radians),
