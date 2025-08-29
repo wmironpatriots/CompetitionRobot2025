@@ -31,6 +31,8 @@ import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.function.DoubleSupplier;
+import org.frc6423.robot.Constants;
+import org.frc6423.robot.Robot;
 
 /** Elevator Subsystem */
 public class Elevator extends SubsystemBase implements AutoCloseable {
@@ -80,7 +82,28 @@ public class Elevator extends SubsystemBase implements AutoCloseable {
   private final MechanismRoot2d carriageRoot =
       mech2d.getRoot("carriageRoot", (MAX_EXTENSION_HEIGHT.in(Centimeters) / 2) - 2, 0.0);
 
-  public Elevator(ElevatorIO hardware) {
+  /**
+   * @return {@link Elevator} subsystem with no hardware
+   */
+  public static Elevator none() {
+    return new Elevator(new ElevatorIONone());
+  }
+
+  /**
+   * Factory to create {@link Elevator} subsystem based on whether the robot is simulated or not
+   *
+   * @return {@link Elevator} subsystem
+   */
+  public static Elevator create() {
+    if (Robot.isSimulation()) {
+      return new Elevator(new ElevatorIOSim());
+    } else {
+      return new Elevator(
+          new ElevatorIOReal(Constants.Ports.ELEVATOR_PARENT, Constants.Ports.ELEVATOR_CHILD));
+    }
+  }
+
+  private Elevator(ElevatorIO hardware) {
     this.hardware = hardware;
 
     baseRoot.append(

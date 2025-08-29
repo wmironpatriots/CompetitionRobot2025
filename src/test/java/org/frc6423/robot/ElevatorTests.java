@@ -17,7 +17,6 @@ import edu.wpi.first.wpilibj.Timer;
 import java.util.ArrayList;
 import java.util.stream.Stream;
 import org.frc6423.robot.subsystems.superstructure.elevator.Elevator;
-import org.frc6423.robot.subsystems.superstructure.elevator.ElevatorIOSim;
 import org.frc6423.robot.subsystems.superstructure.elevator.ElevatorState;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,7 +38,7 @@ class ElevatorTests {
     // Init sys
     setupTest();
     // Create elevator
-    elevator = new Elevator(new ElevatorIOSim());
+    elevator = Elevator.create();
     // Start test timer
     timer.start();
   }
