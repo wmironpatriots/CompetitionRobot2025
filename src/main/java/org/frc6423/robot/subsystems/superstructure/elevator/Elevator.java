@@ -31,12 +31,15 @@ import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.function.DoubleSupplier;
-import org.frc6423.robot.Constants;
 import org.frc6423.robot.Robot;
 
 /** Elevator Subsystem */
 public class Elevator extends SubsystemBase implements AutoCloseable {
   // * CONSTANTS
+  public static final String CANBUS = "CANCHAN";
+  public static final int PARENT_MOTOR_ID = 14;
+  public static final int CHILD_MOTOR_ID = 15;
+
   /** Gear ratio of the elevator gearbox */
   public static final double GEAR_REDUCTION = 3 / 1;
 
@@ -83,23 +86,26 @@ public class Elevator extends SubsystemBase implements AutoCloseable {
       mech2d.getRoot("carriageRoot", (MAX_EXTENSION_HEIGHT.in(Centimeters) / 2) - 2, 0.0);
 
   /**
-   * @return {@link Elevator} subsystem with no hardware
+   * @return fake {@link Elevator} subsystem
    */
   public static Elevator none() {
-    return new Elevator(new ElevatorIONone());
+    if (Robot.isReal()) {
+      return new Elevator(new ElevatorIOReal());
+    } else {
+      return new Elevator(new ElevatorIOSim());
+    }
   }
 
   /**
-   * Factory to create {@link Elevator} subsystem based on whether the robot is simulated or not
+   * Factory for creating a {@link Elevator} subsystem
    *
-   * @return {@link Elevator} subsystem
+   * @return {@link Elevator} Subsystem
    */
   public static Elevator create() {
-    if (Robot.isSimulation()) {
-      return new Elevator(new ElevatorIOSim());
+    if (Robot.isReal()) {
+      return new Elevator(new ElevatorIOReal());
     } else {
-      return new Elevator(
-          new ElevatorIOReal(Constants.Ports.ELEVATOR_PARENT, Constants.Ports.ELEVATOR_CHILD));
+      return new Elevator(new ElevatorIOSim());
     }
   }
 

@@ -8,8 +8,11 @@ package org.frc6423.robot.subsystems.superstructure.elevator;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
+import static org.frc6423.robot.subsystems.superstructure.elevator.Elevator.CANBUS;
+import static org.frc6423.robot.subsystems.superstructure.elevator.Elevator.CHILD_MOTOR_ID;
 import static org.frc6423.robot.subsystems.superstructure.elevator.Elevator.MAX_ACCELERATION;
 import static org.frc6423.robot.subsystems.superstructure.elevator.Elevator.MAX_VELOCITY;
+import static org.frc6423.robot.subsystems.superstructure.elevator.Elevator.PARENT_MOTOR_ID;
 import static org.frc6423.robot.subsystems.superstructure.elevator.Elevator.SENSOR_TO_MECH_RATIO;
 
 import com.ctre.phoenix6.BaseStatusSignal;
@@ -21,7 +24,6 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-import org.frc6423.lib.types.CanDeviceId;
 
 /** Comp bot {@link ElevatorIO} */
 public class ElevatorIOReal implements ElevatorIO {
@@ -35,9 +37,9 @@ public class ElevatorIOReal implements ElevatorIO {
   private final BaseStatusSignal parentPoseSig, parentCurrentSig, parentTempSig;
   private final BaseStatusSignal childPoseSig, childCurrentSig, childTempSig;
 
-  public ElevatorIOReal(CanDeviceId parentMotorId, CanDeviceId childMotorId) {
-    parent = new TalonFX(parentMotorId.getCanId(), parentMotorId.getBusName());
-    child = new TalonFX(childMotorId.getCanId(), childMotorId.getBusName());
+  public ElevatorIOReal() {
+    parent = new TalonFX(PARENT_MOTOR_ID, CANBUS);
+    child = new TalonFX(CHILD_MOTOR_ID, CANBUS);
 
     conf = new TalonFXConfiguration();
 
