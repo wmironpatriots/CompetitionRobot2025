@@ -28,6 +28,7 @@ public class Constants {
   }
 
   /** Constants representing port IDs that devices are connected to */
+  @Deprecated
   public class Ports {
     // * CANIVORE LOOP
     public static final CANBus CANCHAN = new CANBus("CANchan"); // :3

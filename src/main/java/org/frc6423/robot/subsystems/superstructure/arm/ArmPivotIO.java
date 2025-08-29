@@ -32,7 +32,7 @@ public interface ArmPivotIO extends AutoCloseable {
   public double getStatorCurrentAmps();
 
   /**
-   * Reset relative encoder to specified position
+   * Reset relative encoder of pivot motor to specified position
    *
    * @param poseRads position to reset to in radians
    */

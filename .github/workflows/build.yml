@@ -35,3 +35,5 @@ jobs:
           git push
       - name: Build Robot Code
         run: ./gradlew build
+      - name: Run Tests
+        run: ./gradlew test

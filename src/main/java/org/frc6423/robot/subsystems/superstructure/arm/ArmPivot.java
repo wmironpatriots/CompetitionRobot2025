@@ -47,10 +47,9 @@ public class ArmPivot extends SubsystemBase implements AutoCloseable {
 
   private final LinearFilter pivotCurrentFilter = LinearFilter.movingAverage(5);
 
-  @Logged(name = "Filted Pivot Motor Current (Amps)")
+  @Logged(name = "Filted Pivot Motor Stator Current (Amps)")
   private double filteredPivotCurrent;
 
-  @Logged(name = "Is Zeroed (bool)")
   private boolean isZeroed = false;
 
   private final Mechanism2d canvas =
@@ -79,6 +78,14 @@ public class ArmPivot extends SubsystemBase implements AutoCloseable {
   }
 
   /**
+   * @return true if arm has been homed
+   */
+  @Logged(name = "Is Zeroed (bool)")
+  public boolean isZeroed() {
+    return isZeroed;
+  }
+
+  /**
    * @return true if arm is within a certain tolerance of the setpoint angle
    */
   @Logged(name = "Near Setpoint Angle (bool)")
@@ -94,10 +101,7 @@ public class ArmPivot extends SubsystemBase implements AutoCloseable {
    */
   // TODO CHECK VALUES
   public Command runCurrentHoming() {
-    return this.run(
-            () -> {
-              hardware.setVolts(-2.5);
-            })
+    return this.run(() -> hardware.setVolts(-2.5))
         .until(() -> Math.abs(filteredPivotCurrent) > 50.0)
         .finallyDo(
             (interupted) -> {
