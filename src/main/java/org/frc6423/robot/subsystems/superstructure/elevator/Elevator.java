@@ -136,7 +136,7 @@ public class Elevator extends SubsystemBase implements AutoCloseable {
   }
 
   /**
-   * @return true if elevator has been zeroed
+   * @return true if elevator has been homed
    */
   @Logged(name = "Is Zeroed (bool)")
   public boolean isZeroed() {
@@ -206,7 +206,7 @@ public class Elevator extends SubsystemBase implements AutoCloseable {
    * @return {@link Command}
    */
   public Command runExtension(ElevatorState extension) {
-    return runExtension(extension.height);
+    return this.runExtension(extension.height);
   }
 
   /**
@@ -236,7 +236,7 @@ public class Elevator extends SubsystemBase implements AutoCloseable {
    * @return {@link Command}
    */
   public Command runExtension(double extensionMeters) {
-    return runExtension(() -> extensionMeters);
+    return this.runExtension(() -> extensionMeters);
   }
 
   @Override

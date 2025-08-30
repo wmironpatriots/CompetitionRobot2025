@@ -29,9 +29,10 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 
 /** Comp bot {@link ElevatorIO} */
 public class ElevatorIOReal implements ElevatorIO {
-  private final TalonFX parent, child;
+  private final TalonFX parent = new TalonFX(PARENT_MOTOR_ID, CANBUS);
+  private final TalonFX child = new TalonFX(CHILD_MOTOR_ID, CANBUS);
 
-  private final TalonFXConfiguration conf;
+  private final TalonFXConfiguration conf = new TalonFXConfiguration();
 
   private final VoltageOut voltReq = new VoltageOut(0.0).withEnableFOC(true);
   private final MotionMagicTorqueCurrentFOC poseReq = new MotionMagicTorqueCurrentFOC(0.0);
@@ -40,11 +41,6 @@ public class ElevatorIOReal implements ElevatorIO {
   private final BaseStatusSignal childPoseSig, childCurrentSig, childTempSig;
 
   public ElevatorIOReal() {
-    parent = new TalonFX(PARENT_MOTOR_ID, CANBUS);
-    child = new TalonFX(CHILD_MOTOR_ID, CANBUS);
-
-    conf = new TalonFXConfiguration();
-
     conf.Audio.BeepOnBoot = true;
     conf.Audio.BeepOnConfig = true;
 
@@ -54,10 +50,10 @@ public class ElevatorIOReal implements ElevatorIO {
     conf.HardwareLimitSwitch.ForwardLimitAutosetPositionEnable = true;
     conf.HardwareLimitSwitch.ForwardLimitAutosetPositionValue = MAX_EXTENSION_HEIGHT.in(Meters);
 
-    conf.CurrentLimits.StatorCurrentLimitEnable = true;
-    conf.CurrentLimits.StatorCurrentLimit = 80.0;
     conf.CurrentLimits.SupplyCurrentLimitEnable = true;
     conf.CurrentLimits.SupplyCurrentLimit = 40.0;
+    conf.CurrentLimits.StatorCurrentLimitEnable = true;
+    conf.CurrentLimits.StatorCurrentLimit = 80.0;
 
     conf.Feedback.SensorToMechanismRatio = SENSOR_TO_MECH_RATIO;
     conf.ClosedLoopRamps.TorqueClosedLoopRampPeriod = 0.1;

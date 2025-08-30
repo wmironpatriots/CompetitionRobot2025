@@ -151,7 +151,7 @@ public class ArmPivot extends SubsystemBase implements AutoCloseable {
    * @return {@link Command}
    */
   public Command runAngle(double angleRads) {
-    return runAngle(() -> angleRads);
+    return this.runAngle(() -> angleRads);
   }
 
   @Override
