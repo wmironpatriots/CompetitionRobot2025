@@ -11,6 +11,7 @@ import static org.frc6423.robot.subsystems.superstructure.arm.ArmPivot.*;
 import static org.frc6423.robot.subsystems.superstructure.elevator.Elevator.MAX_EXTENSION_HEIGHT;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
@@ -65,12 +66,25 @@ public class Visualizer {
     SmartDashboard.putData("GlobalVisualizer", mech2d);
   }
 
+  public void setStageHeight(Distance height) {
+    stageRoot.setPosition((MAX_EXTENSION_HEIGHT.in(Centimeters) / 2) - 2, height.in(Centimeters));
+  }
+
+  public void setCarriageHeight(Distance height) {
+    carriageRoot.setPosition(
+        (MAX_EXTENSION_HEIGHT.in(Centimeters) / 2) - 4, height.in(Centimeters));
+  }
+
   public void setStageHeight(double heightCentimeters) {
     stageRoot.setPosition((MAX_EXTENSION_HEIGHT.in(Centimeters) / 2) - 2, heightCentimeters);
   }
 
   public void setCarriageHeight(double heightCentimeters) {
     carriageRoot.setPosition((MAX_EXTENSION_HEIGHT.in(Centimeters) / 2) - 4, heightCentimeters);
+  }
+
+  public void setArmAngle(Rotation2d angle) {
+    arm.setAngle(angle.unaryMinus().plus(Rotation2d.kCCW_90deg));
   }
 
   public void setArmAngle(double angleRads) {
