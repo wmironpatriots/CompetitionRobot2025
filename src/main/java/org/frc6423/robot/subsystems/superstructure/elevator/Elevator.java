@@ -22,16 +22,11 @@ import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearAcceleration;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Mass;
-import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
-import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
-import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj.util.Color;
-import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.function.DoubleSupplier;
 import org.frc6423.robot.Robot;
+import org.frc6423.robot.subsystems.superstructure.Visualizer;
 
 /** Elevator Subsystem */
 public class Elevator extends SubsystemBase implements AutoCloseable {
@@ -74,16 +69,7 @@ public class Elevator extends SubsystemBase implements AutoCloseable {
 
   private boolean isZeroed = false;
 
-  // Visualizer
-  private final Mechanism2d mech2d =
-      new Mechanism2d(
-          MAX_EXTENSION_HEIGHT.in(Centimeters), MAX_EXTENSION_HEIGHT.in(Centimeters) * 2 + 10);
-  private final MechanismRoot2d baseRoot =
-      mech2d.getRoot("base", MAX_EXTENSION_HEIGHT.in(Centimeters) / 2, 0.0);
-  private final MechanismRoot2d stageRoot =
-      mech2d.getRoot("stageRoot", (MAX_EXTENSION_HEIGHT.in(Centimeters) / 2) - 1, 0.0);
-  private final MechanismRoot2d carriageRoot =
-      mech2d.getRoot("carriageRoot", (MAX_EXTENSION_HEIGHT.in(Centimeters) / 2) - 2, 0.0);
+  private final Visualizer visualizer = Visualizer.getInstance();
 
   /**
    * @return fake {@link Elevator} subsystem
@@ -111,15 +97,6 @@ public class Elevator extends SubsystemBase implements AutoCloseable {
 
   private Elevator(ElevatorIO hardware) {
     this.hardware = hardware;
-
-    baseRoot.append(
-        new MechanismLigament2d("base", 81.43936976, 90.0, 10.0, new Color8Bit(Color.kRed)));
-    stageRoot.append(
-        new MechanismLigament2d("stage", 83.82, 90.0, 7.0, new Color8Bit(Color.kYellow)));
-    carriageRoot.append(
-        new MechanismLigament2d("carriage", 17.78, 90.0, 4.5, new Color8Bit(Color.kGreen)));
-
-    SmartDashboard.putData("Elevator Visualizer", mech2d);
   }
 
   @Override
@@ -129,10 +106,8 @@ public class Elevator extends SubsystemBase implements AutoCloseable {
     filteredCurrent = currentFilter.calculate(hardware.getParentStatorCurrentAmps());
 
     /** Set visualizer poses */
-    stageRoot.setPosition(
-        (MAX_EXTENSION_HEIGHT.in(Centimeters) / 2) - 2, getStageHeight().in(Centimeters));
-    carriageRoot.setPosition(
-        (MAX_EXTENSION_HEIGHT.in(Centimeters) / 2) - 4, getCarriageHeight().in(Centimeters));
+    visualizer.setCarriageHeight(getCarriageHeight().in(Centimeters));
+    visualizer.setStageHeight(getStageHeight().in(Centimeters));
   }
 
   /**

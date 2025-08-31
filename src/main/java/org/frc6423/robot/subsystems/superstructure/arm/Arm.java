@@ -35,7 +35,7 @@ public class Arm extends SubsystemBase {
   /**
    * @return fake {@link Arm} subsystem
    */
-  public Arm none() {
+  public static Arm none() {
     return new Arm(new ArmPivotIONone(), new RollerIONone());
   }
 
@@ -44,7 +44,7 @@ public class Arm extends SubsystemBase {
    *
    * @return {@link Arm} Subsystem
    */
-  public Arm create() {
+  public static Arm create() {
     if (Robot.isReal()) {
       return new Arm(new ArmPivotIOReal(), new RollerIONeo());
     } else {
@@ -83,7 +83,9 @@ public class Arm extends SubsystemBase {
    */
   public Command runState(Angle pivotAngle, AngularVelocity rollerSpeed) {
     return Commands.parallel(
-        pivot.runAngle(pivotAngle.in(Radians)), roller.runSpeed(rollerSpeed.in(RPM)));
+        this.run(() -> {}).until(() -> true),
+        pivot.runAngle(pivotAngle.in(Radians)),
+        roller.runSpeed(rollerSpeed.in(RPM)));
   }
 
   /**
@@ -95,6 +97,7 @@ public class Arm extends SubsystemBase {
    */
   public Command runState(DoubleSupplier pivotAngleRads, DoubleSupplier rollerSpeedRpm) {
     return Commands.parallel(
+        this.run(() -> {}).until(() -> true),
         pivot.runAngle(pivotAngleRads.getAsDouble()),
         roller.runSpeed(rollerSpeedRpm.getAsDouble()));
   }

@@ -6,7 +6,6 @@
 
 package org.frc6423.robot.subsystems.superstructure.arm;
 
-import static edu.wpi.first.units.Units.Centimeters;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.KilogramSquareMeters;
@@ -15,19 +14,13 @@ import static edu.wpi.first.units.Units.Radians;
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.LinearFilter;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.MomentOfInertia;
-import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
-import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
-import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj.util.Color;
-import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.function.DoubleSupplier;
+import org.frc6423.robot.subsystems.superstructure.Visualizer;
 
 /** Pivot subsystem-component of the {@link Arm} Subsystem */
 public class ArmPivot extends SubsystemBase implements AutoCloseable {
@@ -63,20 +56,10 @@ public class ArmPivot extends SubsystemBase implements AutoCloseable {
 
   private boolean isZeroed = false;
 
-  // Visualizer
-  private final Mechanism2d mech2d =
-      new Mechanism2d(LENGTH.in(Centimeters), LENGTH.in(Centimeters) * 2);
-  private final MechanismRoot2d root =
-      mech2d.getRoot("pivot", LENGTH.in(Centimeters), LENGTH.in(Centimeters));
-  private final MechanismLigament2d arm =
-      root.append(
-          new MechanismLigament2d(
-              "arm", LENGTH.in(Centimeters), 0.0, 10, new Color8Bit(Color.kAliceBlue)));
+  private final Visualizer visualizer = Visualizer.getInstance();
 
   public ArmPivot(ArmPivotIO hardware) {
     this.hardware = hardware;
-
-    SmartDashboard.putData("ArmVisualizer", mech2d);
   }
 
   @Override
@@ -85,8 +68,7 @@ public class ArmPivot extends SubsystemBase implements AutoCloseable {
 
     filteredPivotCurrent = pivotCurrentFilter.calculate(hardware.getStatorCurrentAmps());
 
-    arm.setAngle(
-        Rotation2d.fromRadians(hardware.getAngleRads()).unaryMinus().rotateBy(Rotation2d.k180deg));
+    visualizer.setArmAngle(hardware.getAngleRads());
   }
 
   /**

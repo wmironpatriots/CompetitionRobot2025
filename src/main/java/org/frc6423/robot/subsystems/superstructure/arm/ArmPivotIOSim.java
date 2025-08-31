@@ -35,7 +35,7 @@ public class ArmPivotIOSim implements ArmPivotIO {
   private double pivotAppliedVolts;
 
   private final ProfiledPIDController pivotFeedback =
-      new ProfiledPIDController(10, 0.0, 0.0, new TrapezoidProfile.Constraints(3.5, 3.5));
+      new ProfiledPIDController(20, 0.0, 0.0, new TrapezoidProfile.Constraints(5.5, 17));
 
   public ArmPivotIOSim() {
     SmartDashboard.putData(pivotFeedback);
