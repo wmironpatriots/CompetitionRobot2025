@@ -6,7 +6,6 @@
 
 package org.frc6423.robot.subsystems.superstructure.elevator;
 
-import static edu.wpi.first.units.Units.Centimeters;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
@@ -30,9 +29,13 @@ import org.frc6423.robot.subsystems.superstructure.Visualizer;
 
 /** Elevator Subsystem */
 public class Elevator extends SubsystemBase implements AutoCloseable {
-  // * CONSTANTS
+  /** Name of the CAN bus hardware is on */
   public static final String CANBUS = "CANCHAN";
+
+  /** Parent motor CAN ID */
   public static final int PARENT_MOTOR_ID = 14;
+
+  /** Child motor CAN ID */
   public static final int CHILD_MOTOR_ID = 15;
 
   /** Gear ratio of the elevator gearbox */
@@ -58,6 +61,21 @@ public class Elevator extends SubsystemBase implements AutoCloseable {
 
   /** The acceleration of the elevator's trapezoid profile */
   public static final LinearAcceleration MAX_ACCELERATION = MetersPerSecondPerSecond.of(10.0);
+
+  /** Represents a height the elevator can extend to */
+  public static enum ElevatorExtension {
+    STOWED(Meters.of(0.0)),
+    INTAKING(Meters.of(0.0)),
+    L2(Meters.of(4.549)),
+    L3(Meters.of(12.41)),
+    L4(Meters.of(24.0));
+
+    Distance height;
+
+    ElevatorExtension(Distance height) {
+      this.height = height;
+    }
+  }
 
   @Logged(name = "Elevator Hardware Loggables")
   private final ElevatorIO hardware;
@@ -104,10 +122,6 @@ public class Elevator extends SubsystemBase implements AutoCloseable {
     hardware.periodic();
 
     filteredCurrent = currentFilter.calculate(hardware.getParentStatorCurrentAmps());
-
-    /** Set visualizer poses */
-    visualizer.setCarriageHeight(getCarriageHeight().in(Centimeters));
-    visualizer.setStageHeight(getStageHeight().in(Centimeters));
   }
 
   /**
@@ -177,21 +191,21 @@ public class Elevator extends SubsystemBase implements AutoCloseable {
   /**
    * Run elevator to specified extension height
    *
-   * @param extension {@link ElevatorState} representing desired extension height
-   * @return {@link Command}
-   */
-  public Command runExtension(ElevatorState extension) {
-    return this.runExtension(extension.height);
-  }
-
-  /**
-   * Run elevator to specified extension height
-   *
    * @param extension {@link Distance} representing desired extension height
    * @return {@link Command}
    */
   public Command runExtension(Distance extension) {
     return this.run(() -> hardware.setPose(extension.in(Meters)));
+  }
+
+  /**
+   * Run elevator to specified extension height
+   *
+   * @param extension {@link ElevatorExtension} representing desired extension height
+   * @return {@link Command}
+   */
+  public Command runExtension(ElevatorExtension extension) {
+    return runExtension(extension.height);
   }
 
   /**
