@@ -25,7 +25,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.function.DoubleSupplier;
 import org.frc6423.robot.Robot;
-import org.frc6423.robot.subsystems.superstructure.Visualizer;
 
 /** Elevator Subsystem */
 public class Elevator extends SubsystemBase implements AutoCloseable {
@@ -64,11 +63,16 @@ public class Elevator extends SubsystemBase implements AutoCloseable {
 
   /** Represents a height the elevator can extend to */
   public static enum ElevatorExtension {
-    STOWED(Meters.of(0.0)),
-    INTAKING(Meters.of(0.0)),
-    L2(Meters.of(4.549)),
-    L3(Meters.of(12.41)),
-    L4(Meters.of(24.0));
+    /** Extension height for resting */
+    STOWED(Inches.of(0.0)),
+    /** Extension height for intaking coral */
+    INTAKING(Inches.of(9.963)),
+    /** Extension height for scoring on Level 2 */
+    L2(Inches.of(4.549)),
+    /** Extension height for scoring on Level 3 */
+    L3(Inches.of(12.41)),
+    /** Extension height for scoring on Level 4 */
+    L4(Inches.of(24.0));
 
     Distance height;
 
@@ -87,17 +91,11 @@ public class Elevator extends SubsystemBase implements AutoCloseable {
 
   private boolean isZeroed = false;
 
-  private final Visualizer visualizer = Visualizer.getInstance();
-
   /**
    * @return fake {@link Elevator} subsystem
    */
   public static Elevator none() {
-    if (Robot.isReal()) {
-      return new Elevator(new ElevatorIOReal());
-    } else {
-      return new Elevator(new ElevatorIOSim());
-    }
+    return new Elevator(new ElevatorIONone());
   }
 
   /**
@@ -142,21 +140,6 @@ public class Elevator extends SubsystemBase implements AutoCloseable {
   }
 
   /**
-   * @return {@link Distance} representing carriage height
-   */
-  public Distance getCarriageHeight() {
-    return Meters.of(hardware.getParentPoseMeters()).times(2);
-  }
-
-  /**
-   * @return {@link Pose3d} representing the pose of the carriage
-   */
-  @Logged(name = "Carriage (Pose3d)")
-  public Pose3d getCarriagePose3d() {
-    return new Pose3d(Meters.of(0.0), Meters.of(0.0), getStageHeight().times(2), Rotation3d.kZero);
-  }
-
-  /**
    * @return {@link Distance} representing stage height
    */
   public Distance getStageHeight() {
@@ -169,6 +152,21 @@ public class Elevator extends SubsystemBase implements AutoCloseable {
   @Logged(name = "Stage (Pose3d)")
   public Pose3d getFirstPose3d() {
     return new Pose3d(Meters.of(0.0), Meters.of(0.0), getStageHeight(), Rotation3d.kZero);
+  }
+
+  /**
+   * @return {@link Distance} representing carriage height
+   */
+  public Distance getCarriageHeight() {
+    return getStageHeight().times(2);
+  }
+
+  /**
+   * @return {@link Pose3d} representing the pose of the carriage
+   */
+  @Logged(name = "Carriage (Pose3d)")
+  public Pose3d getCarriagePose3d() {
+    return new Pose3d(Meters.of(0.0), Meters.of(0.0), getCarriageHeight(), Rotation3d.kZero);
   }
 
   /**
