@@ -10,22 +10,28 @@ import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecondPerSecond;
 
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.LinearFilter;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularAcceleration;
+import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.MomentOfInertia;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.function.DoubleSupplier;
-import org.frc6423.robot.subsystems.superstructure.Visualizer;
 
 /** Pivot subsystem-component of the {@link Arm} Subsystem */
 public class ArmPivot extends SubsystemBase implements AutoCloseable {
-  // * CONSTANTS
+  /** Name of the CAN bus hardware is on */
   public static final String CANBUS = "RIO";
+
+  /** Pivot motor CAN ID */
   public static final int MOTOR_ID = 14;
 
   /** Gear ratio of the pivot gearbox */
@@ -46,17 +52,21 @@ public class ArmPivot extends SubsystemBase implements AutoCloseable {
   /** The max allowable angle error */
   public static final Angle TOLERANCE = Degrees.of(1.5);
 
+  /** The velocity limit of the arm's trapezoid profile */
+  public static final AngularVelocity MAX_VELOCITY = RadiansPerSecond.of(5.5);
+
+  /** The acceleration of the arm's trapezoid profile */
+  public static final AngularAcceleration MAX_ACCELERATION = RadiansPerSecondPerSecond.of(17);
+
   @Logged(name = "Arm Pivot Hardware Loggables")
   private final ArmPivotIO hardware;
 
-  private final LinearFilter pivotCurrentFilter = LinearFilter.movingAverage(5);
+  private final LinearFilter currentFilter = LinearFilter.movingAverage(5);
 
   @Logged(name = "Filted Pivot Motor Stator Current (Amps)")
-  private double filteredPivotCurrent;
+  private double filteredCurrent;
 
   private boolean isZeroed = false;
-
-  private final Visualizer visualizer = Visualizer.getInstance();
 
   public ArmPivot(ArmPivotIO hardware) {
     this.hardware = hardware;
@@ -66,9 +76,7 @@ public class ArmPivot extends SubsystemBase implements AutoCloseable {
   public void periodic() {
     hardware.periodic();
 
-    filteredPivotCurrent = pivotCurrentFilter.calculate(hardware.getStatorCurrentAmps());
-
-    visualizer.setArmAngle(hardware.getAngleRads());
+    filteredCurrent = currentFilter.calculate(hardware.getStatorCurrentAmps());
   }
 
   /**
@@ -89,6 +97,14 @@ public class ArmPivot extends SubsystemBase implements AutoCloseable {
   }
 
   /**
+   * @return {@link Rotation2d} representing the pivot angle
+   */
+  @Logged(name = "Angle (Rotation2d)")
+  public Rotation2d getRotation2d() {
+    return Rotation2d.fromRadians(hardware.getAngleRads());
+  }
+
+  /**
    * Run arm into hardstop to determine home (aka, zero)
    *
    * @return {@link Command}
@@ -96,7 +112,7 @@ public class ArmPivot extends SubsystemBase implements AutoCloseable {
   // TODO CHECK VALUES
   public Command runCurrentHoming() {
     return this.run(() -> hardware.setVolts(-2.5))
-        .until(() -> Math.abs(filteredPivotCurrent) > 50.0)
+        .until(() -> Math.abs(filteredCurrent) > 50.0)
         .finallyDo(
             (interupted) -> {
               if (!interupted) {

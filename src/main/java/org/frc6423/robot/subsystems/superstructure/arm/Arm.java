@@ -10,6 +10,7 @@ import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.Radians;
 
 import edu.wpi.first.epilogue.Logged;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -23,6 +24,37 @@ import org.frc6423.robot.Robot;
 
 /** Arm Subsystem */
 public class Arm extends SubsystemBase {
+  /** Represents a state the {@link Arm} subsystem can be in */
+  // TODO CHECK ROLLER SPEEDS
+  public static enum ArmState {
+    /** Resting state */
+    STOWED(Rotation2d.fromDegrees(90), 0.0),
+    /** Avoidance state for preventing collisions */
+    AVOIDING(Rotation2d.fromDegrees(65), 0.0),
+    /** Flipped state for intaking */
+    INTAKING(Rotation2d.fromDegrees(-90), 20.0),
+    /** L2 pose but not scoring */
+    L2_PRIMED(Rotation2d.fromDegrees(21.975), 0.0),
+    /** L3 pose but not scoring */
+    L3_PRIMED(Rotation2d.fromDegrees(21.975), 0.0),
+    /** L4 pose but not scoring */
+    L4_PRIMED(Rotation2d.fromDegrees(74.5), 0.0),
+    /** L2 scoring */
+    L2_SCORING(Rotation2d.fromDegrees(21.975), -40.0),
+    /** L3 scoring */
+    L3_SCORING(Rotation2d.fromDegrees(21.975), -40.0),
+    /** L4 scoring */
+    L4_SCORING(Rotation2d.fromDegrees(74.5), -40.0);
+
+    public final Rotation2d angle;
+    public final double rollerSpeedRpm;
+
+    private ArmState(Rotation2d angle, double rollerSpeedRpm) {
+      this.angle = angle;
+      this.rollerSpeedRpm = rollerSpeedRpm;
+    }
+  }
+
   @Logged(name = "Pivot Subsystem-Component")
   private final ArmPivot pivot;
 
@@ -65,6 +97,13 @@ public class Arm extends SubsystemBase {
    */
   public boolean isNearSetpointAngle() {
     return pivot.isNearSetpointAngle();
+  }
+
+  /**
+   * @return {@link Rotation2d} representing the arm angle
+   */
+  public Rotation2d getRotation2d() {
+    return pivot.getRotation2d();
   }
 
   /**

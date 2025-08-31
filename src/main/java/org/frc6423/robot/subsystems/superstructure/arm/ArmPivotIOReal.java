@@ -6,13 +6,16 @@
 
 package org.frc6423.robot.subsystems.superstructure.arm;
 
-import static edu.wpi.first.units.Units.MetersPerSecond;
-import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecondPerSecond;
+import static org.frc6423.robot.subsystems.superstructure.arm.ArmPivot.CANBUS;
+import static org.frc6423.robot.subsystems.superstructure.arm.ArmPivot.GEAR_REDUCTION;
+import static org.frc6423.robot.subsystems.superstructure.arm.ArmPivot.MAX_ACCELERATION;
 import static org.frc6423.robot.subsystems.superstructure.arm.ArmPivot.MAX_ANGLE;
+import static org.frc6423.robot.subsystems.superstructure.arm.ArmPivot.MAX_VELOCITY;
 import static org.frc6423.robot.subsystems.superstructure.arm.ArmPivot.MIN_ANGLE;
 import static org.frc6423.robot.subsystems.superstructure.arm.ArmPivot.MOTOR_ID;
-import static org.frc6423.robot.subsystems.superstructure.elevator.Elevator.*;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -62,8 +65,8 @@ public class ArmPivotIOReal implements ArmPivotIO {
     conf.Slot0.kI = 0.0;
     conf.Slot0.kD = 0.0;
 
-    conf.MotionMagic.MotionMagicCruiseVelocity = MAX_VELOCITY.in(MetersPerSecond);
-    conf.MotionMagic.MotionMagicAcceleration = MAX_ACCELERATION.in(MetersPerSecondPerSecond);
+    conf.MotionMagic.MotionMagicCruiseVelocity = MAX_VELOCITY.in(RadiansPerSecond);
+    conf.MotionMagic.MotionMagicAcceleration = MAX_ACCELERATION.in(RadiansPerSecondPerSecond);
 
     motor.getConfigurator().apply(conf);
 
