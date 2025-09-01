@@ -32,6 +32,8 @@ public class ArmPivotIOSim implements ArmPivotIO {
           false,
           0);
 
+  private double setpointAngle;
+
   private double pivotAppliedVolts;
 
   private final ProfiledPIDController pivotFeedback =
@@ -43,6 +45,11 @@ public class ArmPivotIOSim implements ArmPivotIO {
 
   @Override
   public void periodic() {
+    // Calculate fb output
+    var fbOut = pivotFeedback.calculate(getAngleRads(), setpointAngle);
+
+    setVolts(fbOut);
+
     pivotSim.setInputVoltage(pivotAppliedVolts);
     pivotSim.update(0.02);
   }
@@ -73,12 +80,7 @@ public class ArmPivotIOSim implements ArmPivotIO {
   @Override
   public void setAngle(double angleRads) {
     // Clamp value within range
-    angleRads = MathUtil.clamp(angleRads, MIN_ANGLE.in(Radians), MAX_ANGLE.in(Radians));
-
-    // Calculate fb output
-    var fbOut = pivotFeedback.calculate(getAngleRads(), angleRads);
-
-    setVolts(fbOut);
+    setpointAngle = MathUtil.clamp(angleRads, MIN_ANGLE.in(Radians), MAX_ANGLE.in(Radians));
   }
 
   @Override
