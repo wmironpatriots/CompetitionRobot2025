@@ -6,7 +6,6 @@
 
 package org.frc6423.robot.subsystems.superstructure.elevator;
 
-import static edu.wpi.first.units.Units.Centimeters;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
@@ -22,12 +21,6 @@ import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearAcceleration;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Mass;
-import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
-import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
-import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj.util.Color;
-import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.function.DoubleSupplier;
@@ -35,9 +28,13 @@ import org.frc6423.robot.Robot;
 
 /** Elevator Subsystem */
 public class Elevator extends SubsystemBase implements AutoCloseable {
-  // * CONSTANTS
+  /** Name of the CAN bus hardware is on */
   public static final String CANBUS = "CANCHAN";
+
+  /** Parent motor CAN ID */
   public static final int PARENT_MOTOR_ID = 14;
+
+  /** Child motor CAN ID */
   public static final int CHILD_MOTOR_ID = 15;
 
   /** Gear ratio of the elevator gearbox */
@@ -64,6 +61,26 @@ public class Elevator extends SubsystemBase implements AutoCloseable {
   /** The acceleration of the elevator's trapezoid profile */
   public static final LinearAcceleration MAX_ACCELERATION = MetersPerSecondPerSecond.of(10.0);
 
+  /** Represents a height the elevator can extend to */
+  public static enum ElevatorExtension {
+    /** Extension height for resting */
+    STOWED(Inches.of(0.0)),
+    /** Extension height for intaking coral */
+    INTAKING(Inches.of(9.963)),
+    /** Extension height for scoring on Level 2 */
+    L2(Inches.of(4.549)),
+    /** Extension height for scoring on Level 3 */
+    L3(Inches.of(12.41)),
+    /** Extension height for scoring on Level 4 */
+    L4(Inches.of(24.0));
+
+    Distance height;
+
+    ElevatorExtension(Distance height) {
+      this.height = height;
+    }
+  }
+
   @Logged(name = "Elevator Hardware Loggables")
   private final ElevatorIO hardware;
 
@@ -74,26 +91,11 @@ public class Elevator extends SubsystemBase implements AutoCloseable {
 
   private boolean isZeroed = false;
 
-  // Visualizer
-  private final Mechanism2d mech2d =
-      new Mechanism2d(
-          MAX_EXTENSION_HEIGHT.in(Centimeters), MAX_EXTENSION_HEIGHT.in(Centimeters) * 2 + 10);
-  private final MechanismRoot2d baseRoot =
-      mech2d.getRoot("base", MAX_EXTENSION_HEIGHT.in(Centimeters) / 2, 0.0);
-  private final MechanismRoot2d stageRoot =
-      mech2d.getRoot("stageRoot", (MAX_EXTENSION_HEIGHT.in(Centimeters) / 2) - 1, 0.0);
-  private final MechanismRoot2d carriageRoot =
-      mech2d.getRoot("carriageRoot", (MAX_EXTENSION_HEIGHT.in(Centimeters) / 2) - 2, 0.0);
-
   /**
    * @return fake {@link Elevator} subsystem
    */
   public static Elevator none() {
-    if (Robot.isReal()) {
-      return new Elevator(new ElevatorIOReal());
-    } else {
-      return new Elevator(new ElevatorIOSim());
-    }
+    return new Elevator(new ElevatorIONone());
   }
 
   /**
@@ -111,15 +113,6 @@ public class Elevator extends SubsystemBase implements AutoCloseable {
 
   private Elevator(ElevatorIO hardware) {
     this.hardware = hardware;
-
-    baseRoot.append(
-        new MechanismLigament2d("base", 81.43936976, 90.0, 10.0, new Color8Bit(Color.kRed)));
-    stageRoot.append(
-        new MechanismLigament2d("stage", 83.82, 90.0, 7.0, new Color8Bit(Color.kYellow)));
-    carriageRoot.append(
-        new MechanismLigament2d("carriage", 17.78, 90.0, 4.5, new Color8Bit(Color.kGreen)));
-
-    SmartDashboard.putData("Elevator Visualizer", mech2d);
   }
 
   @Override
@@ -127,16 +120,10 @@ public class Elevator extends SubsystemBase implements AutoCloseable {
     hardware.periodic();
 
     filteredCurrent = currentFilter.calculate(hardware.getParentStatorCurrentAmps());
-
-    /** Set visualizer poses */
-    stageRoot.setPosition(
-        (MAX_EXTENSION_HEIGHT.in(Centimeters) / 2) - 2, getStageHeight().in(Centimeters));
-    carriageRoot.setPosition(
-        (MAX_EXTENSION_HEIGHT.in(Centimeters) / 2) - 4, getCarriageHeight().in(Centimeters));
   }
 
   /**
-   * @return true if elevator has been zeroed
+   * @return true if elevator has been homed
    */
   @Logged(name = "Is Zeroed (bool)")
   public boolean isZeroed() {
@@ -153,21 +140,6 @@ public class Elevator extends SubsystemBase implements AutoCloseable {
   }
 
   /**
-   * @return {@link Distance} representing carriage height
-   */
-  public Distance getCarriageHeight() {
-    return Meters.of(hardware.getParentPoseMeters()).times(2);
-  }
-
-  /**
-   * @return {@link Pose3d} representing the pose of the carriage
-   */
-  @Logged(name = "Carriage (Pose3d)")
-  public Pose3d getCarriagePose3d() {
-    return new Pose3d(Meters.of(0.0), Meters.of(0.0), getStageHeight().times(2), Rotation3d.kZero);
-  }
-
-  /**
    * @return {@link Distance} representing stage height
    */
   public Distance getStageHeight() {
@@ -180,6 +152,21 @@ public class Elevator extends SubsystemBase implements AutoCloseable {
   @Logged(name = "Stage (Pose3d)")
   public Pose3d getFirstPose3d() {
     return new Pose3d(Meters.of(0.0), Meters.of(0.0), getStageHeight(), Rotation3d.kZero);
+  }
+
+  /**
+   * @return {@link Distance} representing carriage height
+   */
+  public Distance getCarriageHeight() {
+    return getStageHeight().times(2);
+  }
+
+  /**
+   * @return {@link Pose3d} representing the pose of the carriage
+   */
+  @Logged(name = "Carriage (Pose3d)")
+  public Pose3d getCarriagePose3d() {
+    return new Pose3d(Meters.of(0.0), Meters.of(0.0), getCarriageHeight(), Rotation3d.kZero);
   }
 
   /**
@@ -202,21 +189,21 @@ public class Elevator extends SubsystemBase implements AutoCloseable {
   /**
    * Run elevator to specified extension height
    *
-   * @param extension {@link ElevatorState} representing desired extension height
-   * @return {@link Command}
-   */
-  public Command runExtension(ElevatorState extension) {
-    return runExtension(extension.height);
-  }
-
-  /**
-   * Run elevator to specified extension height
-   *
    * @param extension {@link Distance} representing desired extension height
    * @return {@link Command}
    */
   public Command runExtension(Distance extension) {
     return this.run(() -> hardware.setPose(extension.in(Meters)));
+  }
+
+  /**
+   * Run elevator to specified extension height
+   *
+   * @param extension {@link ElevatorExtension} representing desired extension height
+   * @return {@link Command}
+   */
+  public Command runExtension(ElevatorExtension extension) {
+    return runExtension(extension.height);
   }
 
   /**
@@ -236,7 +223,7 @@ public class Elevator extends SubsystemBase implements AutoCloseable {
    * @return {@link Command}
    */
   public Command runExtension(double extensionMeters) {
-    return runExtension(() -> extensionMeters);
+    return this.runExtension(() -> extensionMeters);
   }
 
   @Override
