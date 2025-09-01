@@ -66,4 +66,13 @@ public class ArmRoller extends Roller {
   public Command runSpeed(double speedRpm) {
     return super.runSpeed(speedRpm);
   }
+
+  /**
+   * Hold roller at current speed
+   *
+   * @return {@link Command}
+   */
+  public Command holdSpeed() {
+    return super.holdSpeed();
+  }
 }

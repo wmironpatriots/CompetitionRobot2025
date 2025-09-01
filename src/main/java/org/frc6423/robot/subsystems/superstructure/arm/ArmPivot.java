@@ -23,6 +23,7 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.MomentOfInertia;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.function.DoubleSupplier;
 
@@ -150,6 +151,16 @@ public class ArmPivot extends SubsystemBase implements AutoCloseable {
    */
   public Command runAngle(double angleRads) {
     return this.runAngle(() -> angleRads);
+  }
+
+  /**
+   * Hold pivot at current angle
+   *
+   * @return {@link Command}
+   */
+  public Command holdAngle() {
+    return Commands.sequence(
+        this.runAngle(hardware.getAngleRads()).until(() -> true), this.run(() -> {}));
   }
 
   @Override

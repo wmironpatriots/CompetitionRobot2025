@@ -161,4 +161,13 @@ public class Arm extends SubsystemBase {
   public Command runState(ArmState state) {
     return this.runState(state.angle.getRadians(), state.rollerSpeedRpm);
   }
+
+  /**
+   * Hold arm at current roller speed and angle
+   *
+   * @return {@link Command}
+   */
+  public Command holdState() {
+    return Commands.parallel(this.run(() -> {}), pivot.holdAngle(), roller.holdSpeed());
+  }
 }
