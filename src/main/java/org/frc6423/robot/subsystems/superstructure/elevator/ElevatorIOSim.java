@@ -33,6 +33,8 @@ public class ElevatorIOSim implements ElevatorIO {
 
   private double appliedVolts;
 
+  private double setpointPose;
+
   private final ElevatorFeedforward feedforward = new ElevatorFeedforward(0.0, 0.1265, 0.4, 0.0);
   private final ProfiledPIDController feedback =
       new ProfiledPIDController(15.0, 0.0, 0.0, new TrapezoidProfile.Constraints(2.25, 10.0));
@@ -41,6 +43,20 @@ public class ElevatorIOSim implements ElevatorIO {
 
   @Override
   public void periodic() {
+    // Get current setpoint velocity
+    var currentVel = feedback.getSetpoint().velocity;
+
+    // Calculate next feedback setpoint
+    var fbOut = feedback.calculate(getParentPoseMeters(), setpointPose);
+    // Get next velocity
+    var nextVel = feedback.getSetpoint().velocity;
+
+    // Calculate feedforward velocity output
+    var ffOut = feedforward.calculateWithVelocities(currentVel, nextVel);
+
+    // Combine output
+    setVolts(ffOut + fbOut);
+
     sim.setInputVoltage(appliedVolts);
     sim.update(0.02);
   }
@@ -91,20 +107,7 @@ public class ElevatorIOSim implements ElevatorIO {
   @Override
   public void setPose(double poseMeters) {
     // Clamp pose in range
-    poseMeters = MathUtil.clamp(poseMeters, 0.0, MAX_EXTENSION_HEIGHT.in(Meters));
-    // Get current setpoint velocity
-    var currentVel = feedback.getSetpoint().velocity;
-
-    // Calculate next feedback setpoint
-    var fbOut = feedback.calculate(getParentPoseMeters(), poseMeters);
-    // Get next velocity
-    var nextVel = feedback.getSetpoint().velocity;
-
-    // Calculate feedforward velocity output
-    var ffOut = feedforward.calculateWithVelocities(currentVel, nextVel);
-
-    // Combine output
-    setVolts(ffOut + fbOut);
+    setpointPose = MathUtil.clamp(poseMeters, 0.0, MAX_EXTENSION_HEIGHT.in(Meters));
   }
 
   @Override
