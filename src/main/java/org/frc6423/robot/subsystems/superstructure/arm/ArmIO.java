@@ -8,8 +8,8 @@ package org.frc6423.robot.subsystems.superstructure.arm;
 
 import edu.wpi.first.epilogue.Logged;
 
-/** Generalized hardware methods for {@link ArmPivot} subsystem */
-public interface ArmPivotIO extends AutoCloseable {
+/** Generalized hardware methods for {@link Arm} subsystem */
+public interface ArmIO extends AutoCloseable {
   /** Run periodic hardware logic */
   public void periodic();
 

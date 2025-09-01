@@ -9,7 +9,7 @@ package org.frc6423.robot.subsystems.superstructure.arm;
 import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
-import static org.frc6423.robot.subsystems.superstructure.arm.ArmPivot.*;
+import static org.frc6423.robot.subsystems.superstructure.arm.Arm.*;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -18,8 +18,8 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-/** Simulated {@link ArmPivotIOReal} */
-public class ArmPivotIOSim implements ArmPivotIO {
+/** Simulated {@link ArmIOReal} */
+public class ArmIOSim implements ArmIO {
   private final DCMotor pivotModel = DCMotor.getKrakenX60Foc(1);
   private final SingleJointedArmSim pivotSim =
       new SingleJointedArmSim(
@@ -39,7 +39,7 @@ public class ArmPivotIOSim implements ArmPivotIO {
   private final ProfiledPIDController pivotFeedback =
       new ProfiledPIDController(20, 0.0, 0.0, new TrapezoidProfile.Constraints(5.5, 17));
 
-  public ArmPivotIOSim() {
+  public ArmIOSim() {
     SmartDashboard.putData(pivotFeedback);
   }
 

@@ -9,13 +9,13 @@ package org.frc6423.robot.subsystems.superstructure.arm;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecondPerSecond;
-import static org.frc6423.robot.subsystems.superstructure.arm.ArmPivot.CANBUS;
-import static org.frc6423.robot.subsystems.superstructure.arm.ArmPivot.GEAR_REDUCTION;
-import static org.frc6423.robot.subsystems.superstructure.arm.ArmPivot.MAX_ACCELERATION;
-import static org.frc6423.robot.subsystems.superstructure.arm.ArmPivot.MAX_ANGLE;
-import static org.frc6423.robot.subsystems.superstructure.arm.ArmPivot.MAX_VELOCITY;
-import static org.frc6423.robot.subsystems.superstructure.arm.ArmPivot.MIN_ANGLE;
-import static org.frc6423.robot.subsystems.superstructure.arm.ArmPivot.MOTOR_ID;
+import static org.frc6423.robot.subsystems.superstructure.arm.Arm.CANBUS;
+import static org.frc6423.robot.subsystems.superstructure.arm.Arm.GEAR_REDUCTION;
+import static org.frc6423.robot.subsystems.superstructure.arm.Arm.MAX_ACCELERATION;
+import static org.frc6423.robot.subsystems.superstructure.arm.Arm.MAX_ANGLE;
+import static org.frc6423.robot.subsystems.superstructure.arm.Arm.MAX_VELOCITY;
+import static org.frc6423.robot.subsystems.superstructure.arm.Arm.MIN_ANGLE;
+import static org.frc6423.robot.subsystems.superstructure.arm.Arm.MOTOR_ID;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -26,7 +26,7 @@ import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
-public class ArmPivotIOReal implements ArmPivotIO {
+public class ArmIOReal implements ArmIO {
   private final TalonFX motor = new TalonFX(MOTOR_ID, CANBUS);
 
   private final TalonFXConfiguration conf = new TalonFXConfiguration();
@@ -36,7 +36,7 @@ public class ArmPivotIOReal implements ArmPivotIO {
 
   private final BaseStatusSignal poseSig, currentSig;
 
-  public ArmPivotIOReal() {
+  public ArmIOReal() {
     conf.Audio.BeepOnBoot = true;
     conf.Audio.BeepOnConfig = true;
 

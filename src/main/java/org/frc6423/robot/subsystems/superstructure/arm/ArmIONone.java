@@ -6,9 +6,9 @@
 
 package org.frc6423.robot.subsystems.superstructure.arm;
 
-/** Null {@link ArmPivotIO} */
-public class ArmPivotIONone implements ArmPivotIO {
-  public ArmPivotIONone() {}
+/** Null {@link ArmIO} */
+public class ArmIONone implements ArmIO {
+  public ArmIONone() {}
 
   @Override
   public void periodic() {}

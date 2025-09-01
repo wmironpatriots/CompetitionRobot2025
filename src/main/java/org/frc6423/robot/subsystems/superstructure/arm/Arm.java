@@ -6,69 +6,97 @@
 
 package org.frc6423.robot.subsystems.superstructure.arm;
 
-import static edu.wpi.first.units.Units.RPM;
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.KilogramSquareMeters;
 import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecondPerSecond;
 
 import edu.wpi.first.epilogue.Logged;
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.MomentOfInertia;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.function.DoubleSupplier;
-import org.frc6423.lib.subsystems.RollerIO;
-import org.frc6423.lib.subsystems.RollerIONeo;
-import org.frc6423.lib.subsystems.RollerIONone;
 import org.frc6423.robot.Robot;
 
 /** Arm Subsystem */
-public class Arm extends SubsystemBase {
-  /** Represents a state the {@link Arm} subsystem can be in */
-  // TODO CHECK ROLLER SPEEDS
-  public static enum ArmState {
-    /** Resting state */
-    STOWED(Rotation2d.fromDegrees(90), 0.0),
-    /** Avoidance state for preventing collisions */
-    AVOIDING(Rotation2d.fromDegrees(65), 0.0),
-    /** Flipped state for intaking */
-    INTAKING(Rotation2d.fromDegrees(-90), 20.0),
-    /** L2 pose but not scoring */
-    L2_PRIMED(Rotation2d.fromDegrees(21.975), 0.0),
-    /** L3 pose but not scoring */
-    L3_PRIMED(Rotation2d.fromDegrees(21.975), 0.0),
-    /** L4 pose but not scoring */
-    L4_PRIMED(Rotation2d.fromDegrees(74.5), 0.0),
-    /** L2 scoring */
-    L2_SCORING(Rotation2d.fromDegrees(21.975), -40.0),
-    /** L3 scoring */
-    L3_SCORING(Rotation2d.fromDegrees(21.975), -40.0),
-    /** L4 scoring */
-    L4_SCORING(Rotation2d.fromDegrees(74.5), -40.0);
+public class Arm extends SubsystemBase implements AutoCloseable {
+  /** Name of the CAN bus hardware is on */
+  public static final String CANBUS = "RIO";
 
-    public final Rotation2d angle;
-    public final double rollerSpeedRpm;
+  /** Pivot motor CAN ID */
+  public static final int MOTOR_ID = 14;
 
-    private ArmState(Rotation2d angle, double rollerSpeedRpm) {
+  /** Gear ratio of the pivot gearbox */
+  public static final double GEAR_REDUCTION = 50;
+
+  /** Moment of Inertia of the arm around the pivot */
+  public static final MomentOfInertia MOI = KilogramSquareMeters.of(0.23381);
+
+  /** Length of the arm */
+  public static final Distance LENGTH = Inches.of(7.5);
+
+  /** The smallest feasible angle */
+  public static final Angle MIN_ANGLE = Degrees.of(-90);
+
+  /** The largest feasible angle */
+  public static final Angle MAX_ANGLE = Degrees.of(90);
+
+  /** The max allowable angle error */
+  public static final Angle TOLERANCE = Degrees.of(1.5);
+
+  /** The velocity limit of the arm's trapezoid profile */
+  public static final AngularVelocity MAX_VELOCITY = RadiansPerSecond.of(5.5);
+
+  /** The acceleration of the arm's trapezoid profile */
+  public static final AngularAcceleration MAX_ACCELERATION = RadiansPerSecondPerSecond.of(17);
+
+  /** Represents an angle the arm can rotate to */
+  public static enum ArmAngle {
+    /** Resting angle */
+    STOWED(Degrees.of(90)),
+    /** Collision avoidance angle */
+    AVOIDING(Degrees.of(65)),
+    /** Intaking angle */
+    INTAKING(Degrees.of(-90)),
+    /** Scoring L2 angle */
+    L2(Degrees.of(21.975)),
+    /** Scoring L3 angle */
+    L3(Degrees.of(21.975)),
+    /** Scoring L4 angle */
+    L4(Degrees.of(74.5));
+
+    public final Angle angle;
+
+    private ArmAngle(Angle angle) {
       this.angle = angle;
-      this.rollerSpeedRpm = rollerSpeedRpm;
     }
   }
 
-  @Logged(name = "Pivot Subsystem-Component")
-  private final ArmPivot pivot;
+  @Logged(name = "Arm Hardware Loggables")
+  private final ArmIO hardware;
 
-  @Logged(name = "Roller Subsystem-Component")
-  private final ArmRoller roller;
+  private final LinearFilter currentFilter = LinearFilter.movingAverage(5);
 
-  @Logged(name = "Arm Setpoint State")
-  private ArmState setpointState = ArmState.STOWED;
+  @Logged(name = "Filted Pivot Motor Stator Current (Amps)")
+  private double filteredCurrent;
+
+  private boolean isZeroed = false;
 
   /**
    * @return fake {@link Arm} subsystem
    */
   public static Arm none() {
-    return new Arm(new ArmPivotIONone(), new RollerIONone());
+    return new Arm(new ArmIONone());
   }
 
   /**
@@ -78,96 +106,118 @@ public class Arm extends SubsystemBase {
    */
   public static Arm create() {
     if (Robot.isReal()) {
-      return new Arm(new ArmPivotIOReal(), new RollerIONeo());
+      return new Arm(new ArmIOReal());
     } else {
-      return new Arm(new ArmPivotIOSim(), new RollerIONone());
+      return new Arm(new ArmIOSim());
     }
   }
 
-  private Arm(ArmPivotIO pivotHardware, RollerIO rollerHardware) {
-    this.pivot = new ArmPivot(pivotHardware);
-    this.roller = new ArmRoller(rollerHardware);
+  private Arm(ArmIO hardware) {
+    this.hardware = hardware;
   }
 
   @Override
-  public void periodic() {}
+  public void periodic() {
+    hardware.periodic();
+
+    filteredCurrent = currentFilter.calculate(hardware.getStatorCurrentAmps());
+  }
+
+  /**
+   * @return true if arm has been homed
+   */
+  @Logged(name = "Is Zeroed (bool)")
+  public boolean isZeroed() {
+    return isZeroed;
+  }
 
   /**
    * @return true if arm is within a certain tolerance of the setpoint angle
    */
+  @Logged(name = "Near Setpoint Angle (bool)")
   public boolean isNearSetpointAngle() {
-    return pivot.isNearSetpointAngle();
+    return MathUtil.isNear(
+        hardware.getSetpointAngleRads(), hardware.getAngleRads(), TOLERANCE.in(Radians));
   }
 
   /**
-   * @return {@link Rotation2d} representing the arm angle
+   * @return {@link Rotation2d} representing the pivot angle
    */
+  @Logged(name = "Angle (Rotation2d)")
   public Rotation2d getRotation2d() {
-    return pivot.getRotation2d();
+    return Rotation2d.fromRadians(hardware.getAngleRads());
   }
 
   /**
-   * @return true if arm has vectored coral piece
-   */
-  public boolean hasCoralVectored() {
-    return roller.isStalling();
-  }
-
-  /**
-   * Run arm to specified state
-   *
-   * @param pivotAngle {@link Angle} representing desired pivot angle
-   * @param rollerSpeed {@link AngularVelocity} representing desired roller speed
-   * @return {@link Command}
-   */
-  public Command runState(Angle pivotAngle, AngularVelocity rollerSpeed) {
-    return Commands.parallel(
-        this.run(() -> {}).until(() -> true),
-        pivot.runAngle(pivotAngle.in(Radians)),
-        roller.runSpeed(rollerSpeed.in(RPM)));
-  }
-
-  /**
-   * Run arm to specified state
-   *
-   * @param pivotAngleRads desired pivot angle in radians
-   * @param rollerSpeed desired roller speed in radians
-   * @return {@link Command}
-   */
-  public Command runState(DoubleSupplier pivotAngleRads, DoubleSupplier rollerSpeedRpm) {
-    return Commands.parallel(
-        this.run(() -> {}).until(() -> true),
-        pivot.runAngle(pivotAngleRads.getAsDouble()),
-        roller.runSpeed(rollerSpeedRpm.getAsDouble()));
-  }
-
-  /**
-   * Run arm to specified state
-   *
-   * @param pivotAngleRads desired pivot angle in radians
-   * @param rollerSpeed desired roller speed in radians
-   * @return {@link Command}
-   */
-  public Command runState(double pivotAngleRads, double rollerSpeedRpm) {
-    return this.runState(() -> pivotAngleRads, () -> rollerSpeedRpm);
-  }
-
-  /**
-   * Run arm to specified {@link ArmState}
-   *
-   * @param state desired {@link ArmState}
-   * @return {@link Command}
-   */
-  public Command runState(ArmState state) {
-    return this.runState(state.angle.getRadians(), state.rollerSpeedRpm);
-  }
-
-  /**
-   * Hold arm at current roller speed and angle
+   * Run arm into hardstop to determine home (aka, zero)
    *
    * @return {@link Command}
    */
-  public Command holdState() {
-    return Commands.parallel(this.run(() -> {}), pivot.holdAngle(), roller.holdSpeed());
+  // TODO CHECK VALUES
+  public Command runCurrentHoming() {
+    return this.run(() -> hardware.setVolts(-2.5))
+        .until(() -> Math.abs(filteredCurrent) > 50.0)
+        .finallyDo(
+            (interupted) -> {
+              if (!interupted) {
+                hardware.resetEncoder(0.0);
+                isZeroed = true;
+              }
+            });
+  }
+
+  /**
+   * Run arm to specified angle
+   *
+   * @param angle {@link Angle} representing desired angle
+   * @return {@link Command}
+   */
+  public Command runAngle(Angle angle) {
+    return this.run(() -> hardware.setAngle(angle.in(Radians)));
+  }
+
+  /**
+   * Run arm to specified {@link ArmAngle}
+   *
+   * @param angle desired {@link ArmAngle}
+   * @return {@link Command}
+   */
+  public Command runAngle(ArmAngle angle) {
+    return this.runAngle(angle.angle);
+  }
+
+  /**
+   * Run arm to specified angle
+   *
+   * @param angle desired angle in radians
+   * @return {@link Command}
+   */
+  public Command runAngle(DoubleSupplier angleRads) {
+    return this.run(() -> hardware.setAngle(angleRads.getAsDouble()));
+  }
+
+  /**
+   * Run arm to specified angle
+   *
+   * @param angle desired angle in radians
+   * @return {@link Command}
+   */
+  public Command runAngle(double angleRads) {
+    return this.runAngle(() -> angleRads);
+  }
+
+  /**
+   * Hold pivot at current angle
+   *
+   * @return {@link Command}
+   */
+  public Command holdAngle() {
+    return Commands.sequence(
+        this.runAngle(hardware.getAngleRads()).until(() -> true), this.run(() -> {}));
+  }
+
+  @Override
+  public void close() throws Exception {
+    hardware.close();
   }
 }
