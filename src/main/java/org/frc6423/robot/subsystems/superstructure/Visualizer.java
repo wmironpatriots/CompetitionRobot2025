@@ -7,7 +7,7 @@
 package org.frc6423.robot.subsystems.superstructure;
 
 import static edu.wpi.first.units.Units.Centimeters;
-import static org.frc6423.robot.subsystems.superstructure.arm.ArmPivot.*;
+import static org.frc6423.robot.subsystems.superstructure.arm.Arm.*;
 import static org.frc6423.robot.subsystems.superstructure.elevator.Elevator.MAX_EXTENSION_HEIGHT;
 
 import edu.wpi.first.math.geometry.Rotation2d;

@@ -212,8 +212,7 @@ public class Arm extends SubsystemBase implements AutoCloseable {
    * @return {@link Command}
    */
   public Command holdAngle() {
-    return Commands.sequence(
-        this.runAngle(hardware.getAngleRads()).until(() -> true), this.run(() -> {}));
+    return Commands.sequence(this.runAngle(hardware.getAngleRads()), this.run(() -> {}));
   }
 
   @Override
