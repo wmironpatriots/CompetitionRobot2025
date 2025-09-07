@@ -30,7 +30,7 @@ import org.frc6423.robot.Robot;
 /** Elevator Subsystem */
 public class Elevator extends SubsystemBase implements AutoCloseable {
   /** Name of the CAN bus hardware is on */
-  public static final String CANBUS = "CANCHAN";
+  public static final String CANBUS = "CANchan";
 
   /** Parent motor CAN ID */
   public static final int PARENT_MOTOR_ID = 14;
