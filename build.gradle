@@ -35,18 +35,27 @@ deploy {
                     jvmArgs.add("-XX:+UseSerialGC")
                     jvmArgs.add("-XX:MaxGCPauseMillis=50")
 
-                    // Enable VisualVM connection
-                    jvmArgs.add("-Dcom.sun.management.jmxremote=true")
-                    jvmArgs.add("-Dcom.sun.management.jmxremote.port=1198")
-                    jvmArgs.add("-Dcom.sun.management.jmxremote.local.only=false")
-                    jvmArgs.add("-Dcom.sun.management.jmxremote.ssl=false")
-                    jvmArgs.add("-Dcom.sun.management.jmxremote.authenticate=false")
-                    jvmArgs.add("-Djava.rmi.server.hostname=10.64.23.2")
+                    // TO ENTER PROFILING MODE:
+                    // Run ./gradlew deploy -PprofileMode
+                    if (frc.project.hasProperty("profileMode")) {
+                        project.logger.lifecycle("\u001B[31m~~~~ PROFILING MODE ENABLED ~~~~\u001B[0m")
+                        project.logger.lifecycle("Connect JMX client to roborio-6423-frc-local:1099 or 10.64.23.2:1099 for profiling")
+                        // Enable VisualVM connection
+                        jvmArgs.add("-Dcom.sun.management.jmxremote=true")
+                        jvmArgs.add("-Dcom.sun.management.jmxremote.port=1198")
+                        jvmArgs.add("-Dcom.sun.management.jmxremote.local.only=false")
+                        jvmArgs.add("-Dcom.sun.management.jmxremote.ssl=false")
+                        jvmArgs.add("-Dcom.sun.management.jmxremote.authenticate=false")
+                        jvmArgs.add("-Djava.rmi.server.hostname=10.64.23.2")
+                    }
 
                     // RIO 2.0 ONLY
                     // final MAX_JAVA_HEAP_SIZE_MB = 100;
                     // jvmArgs.add("-Xmx" + MAX_JAVA_HEAP_SIZE_MB + "M")
                     // jvmArgs.add("-Xms" + MAX_JAVA_HEAP_SIZE_MB + "M")
+                    // jvmArgs.add("-XX:GCTimeRatio=5")
+                    // jvmArgs.add("-XX:+UseSerialGC")
+                    // jvmArgs.add("-XX:MaxGCPauseMillis=50")
                     // jvmArgs.add("-XX:+AlwaysPreTouch")
                 }
 
@@ -136,9 +145,6 @@ tasks.withType(JavaCompile) {
 
 // Configure pre-commit hooks on first build
 task installGitHooks(type: Copy) {
-    logger.info("~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-    logger.info("~~~ Installing Git Hooks ~~~")
-    logger.info("~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
     from '.scripts'
     into '.git/hooks'
     logger.info("Successfully Installed Hooks!")
