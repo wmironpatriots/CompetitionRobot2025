@@ -22,7 +22,6 @@ import edu.wpi.first.units.measure.LinearAcceleration;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.function.DoubleSupplier;
 import org.frc6423.robot.Robot;
@@ -233,8 +232,7 @@ public class Elevator extends SubsystemBase implements AutoCloseable {
    * @return {@link Command}
    */
   public Command holdExtension() {
-    return Commands.sequence(
-        this.runExtension(hardware.getParentPoseMeters()).until(() -> true), this.run(() -> {}));
+    return runExtension(() -> hardware.getParentPoseMeters());
   }
 
   @Override

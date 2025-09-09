@@ -23,7 +23,6 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.MomentOfInertia;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.function.DoubleSupplier;
 import org.frc6423.robot.Robot;
@@ -212,7 +211,7 @@ public class Arm extends SubsystemBase implements AutoCloseable {
    * @return {@link Command}
    */
   public Command holdAngle() {
-    return Commands.sequence(this.runAngle(hardware.getAngleRads()), this.run(() -> {}));
+    return runAngle(() -> hardware.getAngleRads());
   }
 
   @Override
