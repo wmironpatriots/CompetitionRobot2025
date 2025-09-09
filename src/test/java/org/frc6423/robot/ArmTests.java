@@ -10,14 +10,15 @@ import static edu.wpi.first.units.Units.Seconds;
 import static org.frc6423.lib.utilities.TestUtils.reset;
 import static org.frc6423.lib.utilities.TestUtils.runToCompletion;
 import static org.frc6423.lib.utilities.TestUtils.setupTest;
-import static org.frc6423.robot.subsystems.superstructure.elevator.Elevator.MAX_EXTENSION_HEIGHT;
+import static org.frc6423.robot.subsystems.superstructure.arm.Arm.MAX_ANGLE;
+import static org.frc6423.robot.subsystems.superstructure.arm.Arm.MIN_ANGLE;
 
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.Timer;
 import java.util.ArrayList;
 import java.util.stream.Stream;
-import org.frc6423.robot.subsystems.superstructure.elevator.Elevator;
-import org.frc6423.robot.subsystems.superstructure.elevator.Elevator.ElevatorExtension;
+import org.frc6423.robot.subsystems.superstructure.arm.Arm;
+import org.frc6423.robot.subsystems.superstructure.arm.Arm.ArmAngle;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.RepeatedTest;
@@ -25,20 +26,20 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-/** {@link Elevator} subsystem test class */
-public class ElevatorTests {
+/** {@link Arm} subsystem test class */
+public class ArmTests {
   /** The max time a test can run for before auto failing */
   public static final Time TIMEOUT = Seconds.of(3.0);
 
-  private Elevator elevator;
+  private Arm arm;
   private Timer timer = new Timer();
 
   @BeforeEach
   public void init() {
     // Init sys
     setupTest();
-    // Create elevator
-    elevator = Elevator.create();
+    // Create arm
+    arm = Arm.create();
     // Start test timer
     timer.start();
   }
@@ -50,44 +51,38 @@ public class ElevatorTests {
     System.out.println("FINISHED TEST IN " + timer.get() + " SECONDS");
 
     // Reset elevator
-    reset(elevator);
+    reset(arm);
   }
 
-  /** Run 10 randomly generated extension heights between 0.0 and the max extension height */
+  /** Run 10 randomly generated angles between the min and max angle */
   @RepeatedTest(10)
-  public void runRandExtension() {
+  public void runRandAngle() {
     runToCompletion(
-        elevator
-            // Picks a random extension height between 0.0 and max extension height
-            .runExtension(MAX_EXTENSION_HEIGHT.times(Math.random()))
-            .until(() -> elevator.isNearSetpointPose())
+        arm.runAngle(MAX_ANGLE.minus(MIN_ANGLE).times(Math.random()).plus(MIN_ANGLE))
+            .until(arm::isNearSetpointAngle)
             .withTimeout(TIMEOUT));
   }
 
   /**
-   * Run all {@link ElevatorExtension}
+   * Run all {@link ArmAngle}
    *
-   * @param extension {@link ElevatorExtension}
+   * @param angle {@link ArmAngle}
    */
   @ParameterizedTest
-  @MethodSource("provideExtensionHeights")
-  public void runExtensions(ElevatorExtension extension) {
-    runToCompletion(
-        elevator
-            .runExtension(extension)
-            .until(() -> elevator.isNearSetpointPose())
-            .withTimeout(TIMEOUT));
+  @MethodSource("provideAngles")
+  public void runAngles(ArmAngle angle) {
+    runToCompletion(arm.runAngle(angle).until(arm::isNearSetpointAngle).withTimeout(TIMEOUT));
   }
 
   /**
-   * @return {@link Stream} of all {@link ElevatorExtension}
+   * @return {@link Stream} of all {@link ArmAngle}
    */
-  private static Stream<Arguments> provideExtensionHeights() {
-    ArrayList<Arguments> extensions = new ArrayList<>();
-    for (var extension : ElevatorExtension.values()) {
-      extensions.add(Arguments.of(extension));
+  private static Stream<Arguments> provideAngles() {
+    ArrayList<Arguments> angles = new ArrayList<>();
+    for (var angle : ArmAngle.values()) {
+      angles.add(Arguments.of(angle));
     }
 
-    return extensions.stream();
+    return angles.stream();
   }
 }
