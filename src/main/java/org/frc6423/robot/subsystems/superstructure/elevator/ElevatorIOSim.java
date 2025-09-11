@@ -77,6 +77,11 @@ public class ElevatorIOSim implements ElevatorIO {
   }
 
   @Override
+  public double getVelocityMps() {
+    return sim.getVelocityMetersPerSecond();
+  }
+
+  @Override
   public double getParentStatorCurrentAmps() {
     return sim.getCurrentDrawAmps();
   }

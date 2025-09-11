@@ -38,7 +38,7 @@ public class ElevatorIOReal implements ElevatorIO {
   private final VoltageOut voltReq = new VoltageOut(0.0).withEnableFOC(true);
   private final MotionMagicTorqueCurrentFOC poseReq = new MotionMagicTorqueCurrentFOC(0.0);
 
-  private final BaseStatusSignal parentPoseSig, parentCurrentSig, parentTempSig;
+  private final BaseStatusSignal parentPoseSig, parentVelSig, parentCurrentSig, parentTempSig;
   private final BaseStatusSignal childPoseSig, childCurrentSig, childTempSig;
 
   public ElevatorIOReal() {
@@ -76,6 +76,7 @@ public class ElevatorIOReal implements ElevatorIO {
     child.setControl(new Follower(parent.getDeviceID(), true));
 
     parentPoseSig = parent.getPosition();
+    parentVelSig = parent.getVelocity();
     parentCurrentSig = parent.getStatorCurrent();
     parentTempSig = parent.getDeviceTemp();
 
@@ -88,6 +89,7 @@ public class ElevatorIOReal implements ElevatorIO {
   public void periodic() {
     BaseStatusSignal.refreshAll(
         parentPoseSig,
+        parentVelSig,
         parentCurrentSig,
         parentTempSig,
         childPoseSig,
@@ -108,6 +110,11 @@ public class ElevatorIOReal implements ElevatorIO {
   @Override
   public double getSetpointPoseMeters() {
     return poseReq.Position;
+  }
+
+  @Override
+  public double getVelocityMps() {
+    return parentVelSig.getValueAsDouble();
   }
 
   @Override

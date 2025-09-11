@@ -26,10 +26,16 @@ public interface ElevatorIO extends AutoCloseable {
   public double getChildPoseMeters();
 
   /**
-   * @return child/parent motor setpoint position
+   * @return parent/child motor setpoint position
    */
   @Logged(name = "Parent and Child Motors Setpoint Position (Meters)")
   public double getSetpointPoseMeters();
+
+  /**
+   * @return parent/child motor velocity in Meters/Second
+   */
+  @Logged(name = "Parent and Child Motors Velocity (Meters Per Second)")
+  public double getVelocityMps();
 
   /**
    * @return parent motor stator current in amps

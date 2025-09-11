@@ -29,6 +29,11 @@ public class ElevatorIONone implements ElevatorIO {
   }
 
   @Override
+  public double getVelocityMps() {
+    return 0.0;
+  }
+
+  @Override
   public double getParentStatorCurrentAmps() {
     return 0.0;
   }
