@@ -135,6 +135,19 @@ public class ElevatorIOReal implements ElevatorIO {
   }
 
   @Override
+  public void setGains(double kG, double kS, double kV, double kA, double kP, double kD) {
+    conf.Slot0.kG = kG;
+    conf.Slot0.kS = kS;
+    conf.Slot0.kV = kV;
+    conf.Slot0.kA = kA;
+    conf.Slot0.kP = kP;
+    conf.Slot0.kD = kD;
+
+    parent.getConfigurator().apply(conf);
+    child.getConfigurator().apply(conf);
+  }
+
+  @Override
   public void setVolts(double volts) {
     parent.setControl(voltReq.withOutput(volts).withEnableFOC(true));
   }

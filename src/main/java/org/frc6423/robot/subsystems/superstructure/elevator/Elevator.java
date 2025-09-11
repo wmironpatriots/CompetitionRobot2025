@@ -17,6 +17,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.networktables.DoubleEntry;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearAcceleration;
 import edu.wpi.first.units.measure.LinearVelocity;
@@ -24,6 +25,8 @@ import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.function.DoubleSupplier;
+import org.frc6423.lib.utilities.NtUtils;
+import org.frc6423.robot.Constants;
 import org.frc6423.robot.Robot;
 
 /** Elevator Subsystem */
@@ -91,6 +94,31 @@ public class Elevator extends SubsystemBase implements AutoCloseable {
 
   private boolean isZeroed = false;
 
+  private static final String gainTopic = "Tunables/elevator";
+  private static final DoubleEntry gainKg = NtUtils.createDoubleEntry(gainTopic + "/kG", 0.0);
+  private static final DoubleEntry gainKs = NtUtils.createDoubleEntry(gainTopic + "/kS", 0.0);
+  private static final DoubleEntry gainKv = NtUtils.createDoubleEntry(gainTopic + "/kV", 0.0);
+  private static final DoubleEntry gainKa = NtUtils.createDoubleEntry(gainTopic + "/kA", 0.0);
+  private static final DoubleEntry gainKp = NtUtils.createDoubleEntry(gainTopic + "/kP", 0.0);
+  private static final DoubleEntry gainKd = NtUtils.createDoubleEntry(gainTopic + "/kD", 0.0);
+
+  static {
+    if (!Constants.Flags.TUNE_MODE) {
+      gainKg.unpublish();
+      gainKs.unpublish();
+      gainKv.unpublish();
+      gainKa.unpublish();
+      gainKp.unpublish();
+      gainKd.unpublish();
+      gainKg.close();
+      gainKs.close();
+      gainKv.close();
+      gainKa.close();
+      gainKp.close();
+      gainKd.close();
+    }
+  }
+
   /**
    * @return fake {@link Elevator} subsystem
    */
@@ -120,6 +148,11 @@ public class Elevator extends SubsystemBase implements AutoCloseable {
     hardware.periodic();
 
     filteredCurrent = currentFilter.calculate(hardware.getParentStatorCurrentAmps());
+
+    if (Constants.Flags.TUNE_MODE) {
+      hardware.setGains(
+          gainKg.get(), gainKs.get(), gainKv.get(), gainKa.get(), gainKp.get(), gainKd.get());
+    }
   }
 
   /**

@@ -100,6 +100,16 @@ public class ElevatorIOSim implements ElevatorIO {
   public void resetEncoders(double poseMeters) {}
 
   @Override
+  public void setGains(double kG, double kS, double kV, double kA, double kP, double kD) {
+    feedforward.setKg(kG);
+    feedforward.setKs(kS);
+    feedforward.setKv(kV);
+    feedforward.setKa(kA);
+    feedback.setP(kP);
+    feedback.setD(kD);
+  }
+
+  @Override
   public void setVolts(double volts) {
     appliedVolts = MathUtil.clamp(volts, -12.0, 12.0);
   }

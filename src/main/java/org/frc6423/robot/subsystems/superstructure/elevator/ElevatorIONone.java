@@ -52,6 +52,9 @@ public class ElevatorIONone implements ElevatorIO {
   public void resetEncoders(double poseMeters) {}
 
   @Override
+  public void setGains(double kG, double kS, double kV, double kA, double kP, double kD) {}
+
+  @Override
   public void setVolts(double volts) {}
 
   @Override
