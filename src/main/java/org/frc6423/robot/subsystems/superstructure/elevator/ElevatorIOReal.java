@@ -9,6 +9,7 @@ package org.frc6423.robot.subsystems.superstructure.elevator;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
+import static org.frc6423.lib.utilities.CtreUtils.*;
 import static org.frc6423.robot.subsystems.superstructure.elevator.Elevator.CANBUS;
 import static org.frc6423.robot.subsystems.superstructure.elevator.Elevator.CHILD_MOTOR_ID;
 import static org.frc6423.robot.subsystems.superstructure.elevator.Elevator.MAX_ACCELERATION;
@@ -70,8 +71,8 @@ public class ElevatorIOReal implements ElevatorIO {
     conf.MotionMagic.MotionMagicCruiseVelocity = MAX_VELOCITY.in(MetersPerSecond);
     conf.MotionMagic.MotionMagicAcceleration = MAX_ACCELERATION.in(MetersPerSecondPerSecond);
 
-    parent.getConfigurator().apply(conf);
-    child.getConfigurator().apply(conf);
+    tryUntilOk(() -> parent.getConfigurator().apply(conf), 10, PARENT_MOTOR_ID);
+    tryUntilOk(() -> child.getConfigurator().apply(conf), 10, CHILD_MOTOR_ID);
     child.setControl(new Follower(parent.getDeviceID(), true));
 
     parentPoseSig = parent.getPosition();
@@ -143,8 +144,9 @@ public class ElevatorIOReal implements ElevatorIO {
     conf.Slot0.kP = kP;
     conf.Slot0.kD = kD;
 
-    parent.getConfigurator().apply(conf);
-    child.getConfigurator().apply(conf);
+    // I think the configurator will only apply if the config is different so this should be fine
+    tryUntilOk(() -> parent.getConfigurator().apply(conf), 10, PARENT_MOTOR_ID);
+    tryUntilOk(() -> child.getConfigurator().apply(conf), 10, CHILD_MOTOR_ID);
   }
 
   @Override
