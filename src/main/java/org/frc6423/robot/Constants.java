@@ -25,6 +25,9 @@ public class Constants {
 
     /** When true, the robot will enable debug menus and log debug information */
     @Deprecated public static final boolean debugMode = false;
+
+    /** When true, tunable entries will be added to NT for subsystems */
+    public static final boolean TUNE_MODE = true;
   }
 
   /** Constants representing port IDs that devices are connected to */
