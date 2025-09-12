@@ -26,7 +26,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.function.DoubleSupplier;
 import org.frc6423.lib.utilities.NtUtils;
-import org.frc6423.robot.Constants;
+import org.frc6423.robot.Constants.Flags;
 import org.frc6423.robot.Robot;
 
 /** Elevator Subsystem */
@@ -95,27 +95,35 @@ public class Elevator extends SubsystemBase implements AutoCloseable {
   private boolean isZeroed = false;
 
   private static final String gainTopic = "Tunables/elevator";
-  private static final DoubleEntry gainKg = NtUtils.createDoubleEntry(gainTopic + "/kG", 0.0);
-  private static final DoubleEntry gainKs = NtUtils.createDoubleEntry(gainTopic + "/kS", 0.0);
-  private static final DoubleEntry gainKv = NtUtils.createDoubleEntry(gainTopic + "/kV", 0.0);
-  private static final DoubleEntry gainKa = NtUtils.createDoubleEntry(gainTopic + "/kA", 0.0);
-  private static final DoubleEntry gainKp = NtUtils.createDoubleEntry(gainTopic + "/kP", 0.0);
-  private static final DoubleEntry gainKd = NtUtils.createDoubleEntry(gainTopic + "/kD", 0.0);
+  private static final DoubleEntry tunableKg = NtUtils.createDoubleEntry(gainTopic + "/kG", 0.0);
+  private static final DoubleEntry tunableKs = NtUtils.createDoubleEntry(gainTopic + "/kS", 0.0);
+  private static final DoubleEntry tunableKv = NtUtils.createDoubleEntry(gainTopic + "/kV", 0.0);
+  private static final DoubleEntry tunableKa = NtUtils.createDoubleEntry(gainTopic + "/kA", 0.0);
+  private static final DoubleEntry tunableKp = NtUtils.createDoubleEntry(gainTopic + "/kP", 0.0);
+  private static final DoubleEntry tunableKd = NtUtils.createDoubleEntry(gainTopic + "/kD", 0.0);
+  private static final DoubleEntry tunableMaxVel =
+      NtUtils.createDoubleEntry(gainTopic + "/maxVel", 0.0);
+  private static final DoubleEntry tunableMaxAccel =
+      NtUtils.createDoubleEntry(gainTopic + "/maxAccel", 0.0);
 
   static {
-    if (!Constants.Flags.TUNE_MODE) {
-      gainKg.unpublish();
-      gainKs.unpublish();
-      gainKv.unpublish();
-      gainKa.unpublish();
-      gainKp.unpublish();
-      gainKd.unpublish();
-      gainKg.close();
-      gainKs.close();
-      gainKv.close();
-      gainKa.close();
-      gainKp.close();
-      gainKd.close();
+    if (!Flags.TUNE_MODE) {
+      tunableKg.unpublish();
+      tunableKs.unpublish();
+      tunableKv.unpublish();
+      tunableKa.unpublish();
+      tunableKp.unpublish();
+      tunableKd.unpublish();
+      tunableMaxVel.unpublish();
+      tunableMaxAccel.unpublish();
+      tunableKg.close();
+      tunableKs.close();
+      tunableKv.close();
+      tunableKa.close();
+      tunableKp.close();
+      tunableKd.close();
+      tunableMaxVel.close();
+      tunableMaxAccel.close();
     }
   }
 
@@ -149,9 +157,16 @@ public class Elevator extends SubsystemBase implements AutoCloseable {
 
     filteredCurrent = currentFilter.calculate(hardware.getParentStatorCurrentAmps());
 
-    if (Constants.Flags.TUNE_MODE) {
+    if (Flags.TUNE_MODE) {
       hardware.setGains(
-          gainKg.get(), gainKs.get(), gainKv.get(), gainKa.get(), gainKp.get(), gainKd.get());
+          tunableKg.get(),
+          tunableKs.get(),
+          tunableKv.get(),
+          tunableKa.get(),
+          tunableKp.get(),
+          tunableKd.get(),
+          tunableMaxVel.get(),
+          tunableMaxAccel.get());
     }
   }
 
@@ -215,6 +230,7 @@ public class Elevator extends SubsystemBase implements AutoCloseable {
               if (!interupted) {
                 hardware.resetEncoders(0.0);
                 isZeroed = true;
+                System.out.println("Elevator Zeroed");
               }
             });
   }

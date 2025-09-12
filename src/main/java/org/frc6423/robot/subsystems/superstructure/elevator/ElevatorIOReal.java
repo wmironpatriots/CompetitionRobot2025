@@ -143,13 +143,23 @@ public class ElevatorIOReal implements ElevatorIO {
   }
 
   @Override
-  public void setGains(double kG, double kS, double kV, double kA, double kP, double kD) {
+  public void setGains(
+      double kG,
+      double kS,
+      double kV,
+      double kA,
+      double kP,
+      double kD,
+      double maxVel,
+      double maxAccel) {
     conf.Slot0.kG = kG;
     conf.Slot0.kS = kS;
     conf.Slot0.kV = kV;
     conf.Slot0.kA = kA;
     conf.Slot0.kP = kP;
     conf.Slot0.kD = kD;
+    conf.MotionMagic.MotionMagicCruiseVelocity = maxVel;
+    conf.MotionMagic.MotionMagicAcceleration = maxAccel;
 
     // I think the configurator will only apply if the config is different so this should be fine
     tryUntilOk(() -> parent.getConfigurator().apply(conf), 10, PARENT_MOTOR_ID);

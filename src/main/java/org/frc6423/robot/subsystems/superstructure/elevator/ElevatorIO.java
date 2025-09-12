@@ -77,8 +77,18 @@ public interface ElevatorIO extends AutoCloseable {
    * @param kA output per unit of target acceleration (output/(mps/s))
    * @param kP output per unit of error in position (meters)
    * @param kD output per unit of error in velocity (mps)
+   * @param maxVel max velocity of motion profile
+   * @param maxAccel max acceleration of motion profile
    */
-  public void setGains(double kG, double kS, double kV, double kA, double kP, double kD);
+  public void setGains(
+      double kG,
+      double kS,
+      double kV,
+      double kA,
+      double kP,
+      double kD,
+      double maxVel,
+      double maxAccel);
 
   /**
    * Set parent/child motors voltage setpoint

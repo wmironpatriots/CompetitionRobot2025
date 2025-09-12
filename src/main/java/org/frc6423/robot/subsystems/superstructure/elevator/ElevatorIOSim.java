@@ -35,9 +35,9 @@ public class ElevatorIOSim implements ElevatorIO {
 
   private double setpointPose;
 
-  private final ElevatorFeedforward feedforward = new ElevatorFeedforward(0.0, 0.1265, 0.4, 0.0);
+  private final ElevatorFeedforward feedforward = new ElevatorFeedforward(0.0, 0.127, 2.65, 0.0);
   private final ProfiledPIDController feedback =
-      new ProfiledPIDController(15.0, 0.0, 0.0, new TrapezoidProfile.Constraints(2.25, 10.0));
+      new ProfiledPIDController(15.0, 0.0, 0.0, new TrapezoidProfile.Constraints(2.25, 4.5));
 
   public ElevatorIOSim() {}
 
@@ -105,13 +105,22 @@ public class ElevatorIOSim implements ElevatorIO {
   public void resetEncoders(double poseMeters) {}
 
   @Override
-  public void setGains(double kG, double kS, double kV, double kA, double kP, double kD) {
+  public void setGains(
+      double kG,
+      double kS,
+      double kV,
+      double kA,
+      double kP,
+      double kD,
+      double maxVel,
+      double maxAccel) {
     feedforward.setKg(kG);
     feedforward.setKs(kS);
     feedforward.setKv(kV);
     feedforward.setKa(kA);
     feedback.setP(kP);
     feedback.setD(kD);
+    feedback.setConstraints(new TrapezoidProfile.Constraints(maxVel, maxAccel));
   }
 
   @Override
