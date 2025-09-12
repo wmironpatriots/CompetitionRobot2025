@@ -32,6 +32,17 @@ public class ArmIONone implements ArmIO {
   public void resetEncoder(double poseRads) {}
 
   @Override
+  public void setGains(
+      double kG,
+      double kS,
+      double kV,
+      double kA,
+      double kP,
+      double kD,
+      double maxVel,
+      double maxAccel) {}
+
+  @Override
   public void setVolts(double volts) {}
 
   @Override

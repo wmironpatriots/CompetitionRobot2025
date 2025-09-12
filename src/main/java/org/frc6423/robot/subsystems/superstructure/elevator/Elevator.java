@@ -230,7 +230,7 @@ public class Elevator extends SubsystemBase implements AutoCloseable {
               if (!interupted) {
                 hardware.resetEncoders(0.0);
                 isZeroed = true;
-                System.out.println("Elevator Zeroed");
+                System.out.println("Elevator Homed!");
               }
             });
   }

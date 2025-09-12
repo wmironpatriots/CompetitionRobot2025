@@ -9,6 +9,7 @@ package org.frc6423.robot.subsystems.superstructure.arm;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecondPerSecond;
+import static org.frc6423.lib.utilities.CtreUtils.tryUntilOk;
 import static org.frc6423.robot.subsystems.superstructure.arm.Arm.CANBUS;
 import static org.frc6423.robot.subsystems.superstructure.arm.Arm.GEAR_REDUCTION;
 import static org.frc6423.robot.subsystems.superstructure.arm.Arm.MAX_ACCELERATION;
@@ -68,7 +69,7 @@ public class ArmIOReal implements ArmIO {
     conf.MotionMagic.MotionMagicCruiseVelocity = MAX_VELOCITY.in(RadiansPerSecond);
     conf.MotionMagic.MotionMagicAcceleration = MAX_ACCELERATION.in(RadiansPerSecondPerSecond);
 
-    motor.getConfigurator().apply(conf);
+    tryUntilOk(() -> motor.getConfigurator().apply(conf), 10, MOTOR_ID);
 
     poseSig = motor.getPosition();
     currentSig = motor.getStatorCurrent();
@@ -97,6 +98,30 @@ public class ArmIOReal implements ArmIO {
   @Override
   public void resetEncoder(double poseRads) {
     motor.setPosition(poseRads);
+  }
+
+  @Override
+  public void setGains(
+      double kG,
+      double kS,
+      double kV,
+      double kA,
+      double kP,
+      double kD,
+      double maxVel,
+      double maxAccel) {
+
+    conf.Slot0.kG = kG;
+    conf.Slot0.kS = kS;
+    conf.Slot0.kV = kV;
+    conf.Slot0.kA = kA;
+    conf.Slot0.kP = kP;
+    conf.Slot0.kD = kD;
+    conf.MotionMagic.MotionMagicCruiseVelocity = maxVel;
+    conf.MotionMagic.MotionMagicAcceleration = maxAccel;
+
+    // I think the configurator will only apply if the config is different so this should be fine
+    tryUntilOk(() -> motor.getConfigurator().apply(conf), 10, MOTOR_ID);
   }
 
   @Override

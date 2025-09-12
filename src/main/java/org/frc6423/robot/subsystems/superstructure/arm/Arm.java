@@ -17,6 +17,7 @@ import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.networktables.DoubleEntry;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -25,6 +26,8 @@ import edu.wpi.first.units.measure.MomentOfInertia;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.function.DoubleSupplier;
+import org.frc6423.lib.utilities.NtUtils;
+import org.frc6423.robot.Constants.Flags;
 import org.frc6423.robot.Robot;
 
 /** Arm Subsystem */
@@ -91,6 +94,39 @@ public class Arm extends SubsystemBase implements AutoCloseable {
 
   private boolean isZeroed = false;
 
+  private static final String gainTopic = "Tunables/elevator";
+  private static final DoubleEntry tunableKg = NtUtils.createDoubleEntry(gainTopic + "/kG", 0.0);
+  private static final DoubleEntry tunableKs = NtUtils.createDoubleEntry(gainTopic + "/kS", 0.0);
+  private static final DoubleEntry tunableKv = NtUtils.createDoubleEntry(gainTopic + "/kV", 0.0);
+  private static final DoubleEntry tunableKa = NtUtils.createDoubleEntry(gainTopic + "/kA", 0.0);
+  private static final DoubleEntry tunableKp = NtUtils.createDoubleEntry(gainTopic + "/kP", 0.0);
+  private static final DoubleEntry tunableKd = NtUtils.createDoubleEntry(gainTopic + "/kD", 0.0);
+  private static final DoubleEntry tunableMaxVel =
+      NtUtils.createDoubleEntry(gainTopic + "/maxVel", 0.0);
+  private static final DoubleEntry tunableMaxAccel =
+      NtUtils.createDoubleEntry(gainTopic + "/maxAccel", 0.0);
+
+  static {
+    if (!Flags.TUNE_MODE) {
+      tunableKg.unpublish();
+      tunableKs.unpublish();
+      tunableKv.unpublish();
+      tunableKa.unpublish();
+      tunableKp.unpublish();
+      tunableKd.unpublish();
+      tunableMaxVel.unpublish();
+      tunableMaxAccel.unpublish();
+      tunableKg.close();
+      tunableKs.close();
+      tunableKv.close();
+      tunableKa.close();
+      tunableKp.close();
+      tunableKd.close();
+      tunableMaxVel.close();
+      tunableMaxAccel.close();
+    }
+  }
+
   /**
    * @return fake {@link Arm} subsystem
    */
@@ -120,6 +156,18 @@ public class Arm extends SubsystemBase implements AutoCloseable {
     hardware.periodic();
 
     filteredCurrent = currentFilter.calculate(hardware.getStatorCurrentAmps());
+
+    if (Flags.TUNE_MODE) {
+      hardware.setGains(
+          tunableKg.get(),
+          tunableKs.get(),
+          tunableKv.get(),
+          tunableKa.get(),
+          tunableKp.get(),
+          tunableKd.get(),
+          tunableMaxVel.get(),
+          tunableMaxAccel.get());
+    }
   }
 
   /**
@@ -161,6 +209,7 @@ public class Arm extends SubsystemBase implements AutoCloseable {
               if (!interupted) {
                 hardware.resetEncoder(0.0);
                 isZeroed = true;
+                System.out.println("Arm Homed!");
               }
             });
   }

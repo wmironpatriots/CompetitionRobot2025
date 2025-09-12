@@ -39,6 +39,28 @@ public interface ArmIO extends AutoCloseable {
   public void resetEncoder(double poseRads);
 
   /**
+   * Set arm gains for onboard feedforward and feedback control
+   *
+   * @param kG output to overcome gravity
+   * @param kS output to overcome static friction
+   * @param kV output per unit of target velocity (output/mps)
+   * @param kA output per unit of target acceleration (output/(mps/s))
+   * @param kP output per unit of error in position (meters)
+   * @param kD output per unit of error in velocity (mps)
+   * @param maxVel max velocity of motion profile
+   * @param maxAccel max acceleration of motion profile
+   */
+  public void setGains(
+      double kG,
+      double kS,
+      double kV,
+      double kA,
+      double kP,
+      double kD,
+      double maxVel,
+      double maxAccel);
+
+  /**
    * Set pivot motor voltage setpoint
    *
    * @param volts desired voltage setpoint
