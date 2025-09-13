@@ -24,6 +24,11 @@ public class ArmIONone implements ArmIO {
   }
 
   @Override
+  public double getVelocityRadsPerSec() {
+    return 0.0;
+  }
+
+  @Override
   public double getStatorCurrentAmps() {
     return 0.0;
   }

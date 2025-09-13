@@ -26,6 +26,12 @@ public interface ArmIO extends AutoCloseable {
   public double getSetpointAngleRads();
 
   /**
+   * @return pivot motor velocity in Radians/Second
+   */
+  @Logged(name = "Pivot Motor Velocity (Radians Per Second)")
+  public double getVelocityRadsPerSec();
+
+  /**
    * @return stator current of pivot motor in amps
    */
   @Logged(name = "Pivot Motor Stator Current (Amps)")

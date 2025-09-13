@@ -35,7 +35,7 @@ public class ArmIOReal implements ArmIO {
   private final VoltageOut voltReq = new VoltageOut(0.0).withEnableFOC(true);
   private final MotionMagicTorqueCurrentFOC poseReq = new MotionMagicTorqueCurrentFOC(0.0);
 
-  private final BaseStatusSignal poseSig, currentSig;
+  private final BaseStatusSignal poseSig, velSig, currentSig;
 
   public ArmIOReal() {
     conf.Audio.BeepOnBoot = true;
@@ -72,12 +72,13 @@ public class ArmIOReal implements ArmIO {
     tryUntilOk(() -> motor.getConfigurator().apply(conf), 10, MOTOR_ID);
 
     poseSig = motor.getPosition();
+    velSig = motor.getVelocity();
     currentSig = motor.getStatorCurrent();
   }
 
   @Override
   public void periodic() {
-    BaseStatusSignal.refreshAll(poseSig, currentSig);
+    BaseStatusSignal.refreshAll(poseSig, velSig, currentSig);
   }
 
   @Override
@@ -88,6 +89,11 @@ public class ArmIOReal implements ArmIO {
   @Override
   public double getSetpointAngleRads() {
     return poseReq.getPositionMeasure().in(Radians);
+  }
+
+  @Override
+  public double getVelocityRadsPerSec() {
+    return velSig.getValueAsDouble();
   }
 
   @Override

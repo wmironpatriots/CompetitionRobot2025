@@ -65,6 +65,11 @@ public class ArmIOSim implements ArmIO {
   }
 
   @Override
+  public double getVelocityRadsPerSec() {
+    return pivotSim.getVelocityRadPerSec();
+  }
+
+  @Override
   public double getStatorCurrentAmps() {
     return pivotSim.getCurrentDrawAmps();
   }
