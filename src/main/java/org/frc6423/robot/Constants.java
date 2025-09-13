@@ -20,21 +20,13 @@ import org.frc6423.lib.types.CanDeviceId;
 public class Constants {
   /** Constants that affect robot bhavior during runtime */
   public class Flags {
-    /** 
-     * Represents how often periodic robot logic will run 
-     * 
-     * </p> 0.02 Seconds by default
-     */
+    /** Represents how often periodic robot logic will run 0.02 Seconds by default */
     public static final Time PERIOD = Seconds.of(0.02);
 
     /** When true, the robot will enable debug menus and log debug information */
     @Deprecated public static final boolean debugMode = false;
 
-    /** 
-     * When true, tunable entries will be added to NT for subsystems 
-     * 
-     * </p> Should be false by default
-     */
+    /** When true, tunable entries will be added to NT for subsystems Should be false by default */
     public static final boolean TUNE_MODE = false;
   }
 
