@@ -18,16 +18,24 @@ import org.frc6423.lib.types.CanDeviceId;
  * <p>When creating a new constant, make sure it is static and final
  */
 public class Constants {
-  /** Constants that affect robot behavior during runtime */
+  /** Constants that affect robot bhavior during runtime */
   public class Flags {
-    /** Represents how often periodic robot logic will run */
+    /** 
+     * Represents how often periodic robot logic will run 
+     * 
+     * </p> 0.02 Seconds by default
+     */
     public static final Time PERIOD = Seconds.of(0.02);
 
     /** When true, the robot will enable debug menus and log debug information */
     @Deprecated public static final boolean debugMode = false;
 
-    /** When true, tunable entries will be added to NT for subsystems */
-    public static final boolean TUNE_MODE = true;
+    /** 
+     * When true, tunable entries will be added to NT for subsystems 
+     * 
+     * </p> Should be false by default
+     */
+    public static final boolean TUNE_MODE = false;
   }
 
   /** Constants representing port IDs that devices are connected to */

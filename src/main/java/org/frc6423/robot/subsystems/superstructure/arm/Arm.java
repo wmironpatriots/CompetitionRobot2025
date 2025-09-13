@@ -17,6 +17,7 @@ import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.networktables.BooleanEntry;
 import edu.wpi.first.networktables.DoubleEntry;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
@@ -94,36 +95,41 @@ public class Arm extends SubsystemBase implements AutoCloseable {
 
   private boolean isZeroed = false;
 
-  private static final String gainTopic = "Tunables/elevator";
-  private static final DoubleEntry tunableKg = NtUtils.createDoubleEntry(gainTopic + "/kG", 0.0);
-  private static final DoubleEntry tunableKs = NtUtils.createDoubleEntry(gainTopic + "/kS", 0.0);
-  private static final DoubleEntry tunableKv = NtUtils.createDoubleEntry(gainTopic + "/kV", 0.0);
-  private static final DoubleEntry tunableKa = NtUtils.createDoubleEntry(gainTopic + "/kA", 0.0);
-  private static final DoubleEntry tunableKp = NtUtils.createDoubleEntry(gainTopic + "/kP", 0.0);
-  private static final DoubleEntry tunableKd = NtUtils.createDoubleEntry(gainTopic + "/kD", 0.0);
-  private static final DoubleEntry tunableMaxVel =
+  /** Setup Tunable Values */
+  private static final String gainTopic = "Tunables/arm";
+
+  private static final BooleanEntry replaceGainsEntry =
+      NtUtils.createBooleanEntry(gainTopic + "/replaceGains", false);
+  private static final DoubleEntry KgEntry = NtUtils.createDoubleEntry(gainTopic + "/kG", 0.0);
+  private static final DoubleEntry KsEntry = NtUtils.createDoubleEntry(gainTopic + "/kS", 0.0);
+  private static final DoubleEntry KvEntry = NtUtils.createDoubleEntry(gainTopic + "/kV", 0.0);
+  private static final DoubleEntry KaEntry = NtUtils.createDoubleEntry(gainTopic + "/kA", 0.0);
+  private static final DoubleEntry KpEntry = NtUtils.createDoubleEntry(gainTopic + "/kP", 0.0);
+  private static final DoubleEntry KdEntry = NtUtils.createDoubleEntry(gainTopic + "/kD", 0.0);
+  private static final DoubleEntry MaxVelEntry =
       NtUtils.createDoubleEntry(gainTopic + "/maxVel", 0.0);
-  private static final DoubleEntry tunableMaxAccel =
+  private static final DoubleEntry MaxAccelEntry =
       NtUtils.createDoubleEntry(gainTopic + "/maxAccel", 0.0);
 
+  /** Unpublish and close tunables if not in Tune Mode */
   static {
     if (!Flags.TUNE_MODE) {
-      tunableKg.unpublish();
-      tunableKs.unpublish();
-      tunableKv.unpublish();
-      tunableKa.unpublish();
-      tunableKp.unpublish();
-      tunableKd.unpublish();
-      tunableMaxVel.unpublish();
-      tunableMaxAccel.unpublish();
-      tunableKg.close();
-      tunableKs.close();
-      tunableKv.close();
-      tunableKa.close();
-      tunableKp.close();
-      tunableKd.close();
-      tunableMaxVel.close();
-      tunableMaxAccel.close();
+      KgEntry.unpublish();
+      KsEntry.unpublish();
+      KvEntry.unpublish();
+      KaEntry.unpublish();
+      KpEntry.unpublish();
+      KdEntry.unpublish();
+      MaxVelEntry.unpublish();
+      MaxAccelEntry.unpublish();
+      KgEntry.close();
+      KsEntry.close();
+      KvEntry.close();
+      KaEntry.close();
+      KpEntry.close();
+      KdEntry.close();
+      MaxVelEntry.close();
+      MaxAccelEntry.close();
     }
   }
 
@@ -157,16 +163,17 @@ public class Arm extends SubsystemBase implements AutoCloseable {
 
     filteredCurrent = currentFilter.calculate(hardware.getStatorCurrentAmps());
 
-    if (Flags.TUNE_MODE) {
+    if (Flags.TUNE_MODE && replaceGainsEntry.getAsBoolean()) {
       hardware.setGains(
-          tunableKg.get(),
-          tunableKs.get(),
-          tunableKv.get(),
-          tunableKa.get(),
-          tunableKp.get(),
-          tunableKd.get(),
-          tunableMaxVel.get(),
-          tunableMaxAccel.get());
+          KgEntry.get(),
+          KsEntry.get(),
+          KvEntry.get(),
+          KaEntry.get(),
+          KpEntry.get(),
+          KdEntry.get(),
+          MaxVelEntry.get(),
+          MaxAccelEntry.get());
+      replaceGainsEntry.set(false);
     }
   }
 
@@ -265,6 +272,16 @@ public class Arm extends SubsystemBase implements AutoCloseable {
 
   @Override
   public void close() throws Exception {
+    /** Close Tunable Entries */
+    KgEntry.close();
+    KsEntry.close();
+    KvEntry.close();
+    KaEntry.close();
+    KpEntry.close();
+    KdEntry.close();
+    MaxVelEntry.close();
+    MaxAccelEntry.close();
+
     hardware.close();
   }
 }
