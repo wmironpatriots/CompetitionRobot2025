@@ -12,6 +12,7 @@ import static edu.wpi.first.units.Units.Radians;
 import static org.frc6423.robot.subsystems.superstructure.arm.Arm.*;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
@@ -29,26 +30,31 @@ public class ArmIOSim implements ArmIO {
           LENGTH.in(Meters),
           MIN_ANGLE.in(Radians),
           MAX_ANGLE.in(Radians),
-          false,
+          true,
           0);
 
   private double setpointAngle;
 
   private double pivotAppliedVolts;
 
-  private final ProfiledPIDController pivotFeedback =
+  private final ArmFeedforward feedforward = new ArmFeedforward(0.0, 0.0, 0.0, 0.0);
+  private final ProfiledPIDController feedback =
       new ProfiledPIDController(20, 0.0, 0.0, new TrapezoidProfile.Constraints(5.5, 17));
 
   public ArmIOSim() {
-    SmartDashboard.putData(pivotFeedback);
+    SmartDashboard.putData(feedback);
   }
 
   @Override
   public void periodic() {
     // Calculate fb output
-    var fbOut = pivotFeedback.calculate(getAngleRads(), setpointAngle);
+    var currentVel = feedback.getSetpoint().velocity;
+    var fbOut = feedback.calculate(getAngleRads(), setpointAngle);
 
-    setVolts(fbOut);
+    var nextVel = feedback.getSetpoint().velocity;
+    var ffOut = feedforward.calculateWithVelocities(getAngleRads(), currentVel, nextVel);
+
+    setVolts(fbOut + ffOut);
 
     pivotSim.setInputVoltage(pivotAppliedVolts);
     pivotSim.update(0.02);
@@ -61,7 +67,7 @@ public class ArmIOSim implements ArmIO {
 
   @Override
   public double getSetpointAngleRads() {
-    return pivotFeedback.getSetpoint().position;
+    return feedback.getSetpoint().position;
   }
 
   @Override
@@ -86,7 +92,15 @@ public class ArmIOSim implements ArmIO {
       double kP,
       double kD,
       double maxVel,
-      double maxAccel) {}
+      double maxAccel) {
+    feedforward.setKg(kG);
+    feedforward.setKs(kS);
+    feedforward.setKv(kV);
+    feedforward.setKa(kA);
+    feedback.setP(kP);
+    feedback.setD(kD);
+    feedback.setConstraints(new TrapezoidProfile.Constraints(maxVel, maxAccel));
+  }
 
   @Override
   public void setVolts(double volts) {
