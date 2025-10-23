@@ -62,7 +62,8 @@ public class Superstructure {
   }
 
   public Command two() {
-    return new WaitUntilCommand(() -> elevator.nearSetpoint(Elevator.POSE_STOWED));
+    return new WaitUntilCommand(() -> elevator.nearSetpoint(Elevator.POSE_STOWED))
+        .finallyDo(() -> something = true);
   }
 
   // * DEFAULT COMMANDS
@@ -83,7 +84,7 @@ public class Superstructure {
   public Command defaultTailCmmd() {
     return Commands.sequence(
         tail.runCurrentZeroingCmmd().onlyIf(() -> !tail.isZeroed),
-        tail.runPoseCmmd(Tail.POSE_SAFTEY).until(() -> something),
+        tail.runPoseCmmd(Tail.POSE_SAFTEY).until(this::getSomething),
         tail.runPoseCmmd(Tail.POSE_STOWED).until(() -> tail.nearSetpoint()));
   }
 
@@ -119,20 +120,26 @@ public class Superstructure {
     return new WaitUntilCommand(() -> elevator.nearSetpoint(Elevator.POSE_INTAKE));
   }
 
-  public Command intakeCoralCmmd() {
+  public Command goToIntaking() {
     return elevator
         .runPoseCmmd(Elevator.POSE_INTAKE)
-        .alongWith(
-            three().andThen(tail.runPoseCmmd(Tail.INTAKING)),
-            chute.runChuteSpeedCmmd(Chute.SPEED_INTAKING),
-            roller.runRollerSpeedCmmd(Roller.SPEED_OUTAKING));
+        .alongWith(three().andThen(tail.runPoseCmmd(Tail.INTAKING)));
   }
 
-  /** Unjams coral in intake */
-  public Command outtakeCoralCmmd() {
+  public Command intakeCoralCmmd() {
+    return chute
+        .runChuteSpeedCmmd(Chute.SPEED_INTAKING)
+        .alongWith(roller.runRollerSpeedCmmd(-Roller.SPEED_INTAKING));
+  }
+
+  public Command outakeCoralCmmd() {
     return chute
         .runChuteSpeedCmmd(Chute.SPEED_OUTAKING)
-        .alongWith(roller.runRollerSpeedCmmd(Roller.SPEED_OUTAKING));
+        .alongWith(roller.runRollerSpeedCmmd(-Roller.SPEED_OUTAKING));
+  }
+
+  public Command stevejobs() {
+    return roller.runRollerSpeedCmmd(Roller.SPEED_OUTAKING);
   }
 
   /** Scores to input level */

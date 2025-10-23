@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -140,12 +141,16 @@ public class Robot extends TimedRobot implements Logged {
     operator.y().whileTrue(superstructure.scoreCoralCmmd(ReefLevel.L3));
     operator.b().whileTrue(superstructure.scoreCoralCmmd(ReefLevel.L4));
     operator.leftBumper().whileTrue(superstructure.intakeCoralCmmd());
-    operator.rightBumper().whileTrue(superstructure.outtakeCoralCmmd());
+    operator.rightBumper().whileTrue(superstructure.outakeCoralCmmd());
     operator.leftTrigger(.03).whileTrue(superstructure.AutointakeCoralCmmd());
     operator.povLeft().whileTrue(climb.runClimb(8));
 
     operator.povUp().whileTrue(superstructure.HIGHdeAlgaeCommand());
     operator.povDown().whileTrue(superstructure.LOWdeAlgaeCommand());
+
+    operator
+        .axisGreaterThan(XboxController.Axis.kRightTrigger.value, 0.3)
+        .whileTrue(superstructure.goToIntaking());
 
     operatorJoystick.button(11).onTrue(setbah(1));
     operatorJoystick.button(9).onTrue(setbah(2));

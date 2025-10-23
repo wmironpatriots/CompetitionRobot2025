@@ -81,14 +81,7 @@ public class SwerveConstants {
         new ModuleConfig(
             2, MATRIXID.BL_PIVOT, MATRIXID.BL_DRIVE, MATRIXID.BL_CANCODER, 0.36, true, true, false),
         new ModuleConfig(
-            3,
-            MATRIXID.BR_PIVOT,
-            MATRIXID.BR_DRIVE,
-            MATRIXID.BR_CANCODER,
-            -0.26,
-            true,
-            true,
-            false),
+            3, MATRIXID.BR_PIVOT, MATRIXID.BR_DRIVE, MATRIXID.BR_CANCODER, 0.0, true, true, false),
       };
 
   // public static final ModuleConfig[] MODULE_CONFIGS =
