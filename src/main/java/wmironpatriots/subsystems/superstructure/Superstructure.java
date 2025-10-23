@@ -29,6 +29,8 @@ public class Superstructure {
 
   public final Trigger disabledTrigger;
 
+  public boolean something = false;
+
   public Superstructure(Swerve swerve, Elevator elevator, Tail tail, Roller roller, Chute chute) {
     // * INIT SUBSYSTEMS
     this.swerve = swerve;
@@ -46,21 +48,42 @@ public class Superstructure {
     Supplier<Pose2d> robotPoseSupplier = () -> swerve.getPose();
   }
 
+  public double getasdfsa() {
+    return elevator.poseRevs;
+  }
+
+  public boolean getSomething() {
+    return something;
+  }
+
+  public Command one() {
+    return new WaitUntilCommand(
+        () -> tail.nearSetpoint(Tail.POSE_SAFTEY) || tail.poseRevs > Tail.POSE_SAFTEY);
+  }
+
+  public Command two() {
+    return new WaitUntilCommand(() -> elevator.nearSetpoint(Elevator.POSE_STOWED));
+  }
+
   // * DEFAULT COMMANDS
   /** Zeros elevator if it hasn't been zeroed since startup and runs elevator to neutral pose */
   public Command defaultElevatorCmmd() {
     return Commands.sequence(
-        elevator.runCurrentZeroingCmmd().onlyIf(() -> !elevator.isZeroed),
+        elevator
+            .runCurrentZeroingCmmd()
+            .onlyIf(() -> !elevator.isZeroed)
+            .finallyDo(() -> something = false),
+        one(),
         elevator.runPoseCmmd(2).until(() -> elevator.poseRevs - 0.2 <= elevator.targetPoseRevs),
-        elevator.stopElevatorCmmd());
+        elevator.stopElevatorCmmd(),
+        two());
   }
 
   /** Zeros tail if it hasn't been zeroed since startup and runs tail to neutral pose */
   public Command defaultTailCmmd() {
     return Commands.sequence(
         tail.runCurrentZeroingCmmd().onlyIf(() -> !tail.isZeroed),
-        tail.runPoseCmmd(0.0)
-            .withDeadline(new WaitUntilCommand(() -> elevator.poseRevs <= Elevator.POSE_COLLISION)),
+        tail.runPoseCmmd(Tail.POSE_SAFTEY).until(() -> something),
         tail.runPoseCmmd(Tail.POSE_STOWED).until(() -> tail.nearSetpoint()));
   }
 
@@ -92,10 +115,17 @@ public class Superstructure {
         .andThen(roller.runRollerSpeedCmmd(0.2).withTimeout(0.1));
   }
 
+  public Command three() {
+    return new WaitUntilCommand(() -> elevator.nearSetpoint(Elevator.POSE_INTAKE));
+  }
+
   public Command intakeCoralCmmd() {
-    return chute
-        .runChuteSpeedCmmd(Chute.SPEED_INTAKING)
-        .alongWith(roller.runRollerSpeedCmmd(Roller.SPEED_INTAKING));
+    return elevator
+        .runPoseCmmd(Elevator.POSE_INTAKE)
+        .alongWith(
+            three().andThen(tail.runPoseCmmd(Tail.INTAKING)),
+            chute.runChuteSpeedCmmd(Chute.SPEED_INTAKING),
+            roller.runRollerSpeedCmmd(Roller.SPEED_OUTAKING));
   }
 
   /** Unjams coral in intake */

@@ -21,7 +21,7 @@ public abstract class Elevator implements Logged, Subsystem {
   public static final double POSE_STOWED = 0.0;
   public static final double POSE_COLLISION =
       4.18; // Position where top of tail will collide with top of first stage when stowed
-  public static final double POSE_INTAKE = 0.0;
+  public static final double POSE_INTAKE = 5;
   public static final double POSE_ALGAE_L = 5.4;
   public static final double POSE_ALGAE_H = 9.7;
   public static final double POSE_L1 = 0;
@@ -85,6 +85,15 @@ public abstract class Elevator implements Logged, Subsystem {
    */
   public Command setCoasting(boolean enabled) {
     return this.run(() -> motorCoasting(enabled));
+  }
+
+  /**
+   * Checks if elevator pose is in a 0.5 rev range from setpoint
+   *
+   * @return true if in range false if not
+   */
+  public boolean nearSetpoint(double bruh) {
+    return Math.abs(bruh - poseRevs) > 0.5;
   }
 
   /**

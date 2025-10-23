@@ -24,7 +24,6 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import java.util.Optional;
 import monologue.Logged;
 import wmironpatriots.commands.Autonomous;
 import wmironpatriots.commands.DriveToPose;
@@ -38,8 +37,6 @@ import wmironpatriots.subsystems.superstructure.tail.TailIOComp;
 import wmironpatriots.subsystems.superstructure.tail.roller.RollerIOComp;
 import wmironpatriots.subsystems.swerve.Swerve;
 import wmironpatriots.subsystems.swerve.Swerve.AlignTargets;
-import wmironpatriots.subsystems.vision.Vision;
-import wmironpatriots.subsystems.vision.VisionIOComp;
 import wmironpatriots.utils.deviceUtils.JoystickUtil;
 
 public class Robot extends TimedRobot implements Logged {
@@ -47,7 +44,6 @@ public class Robot extends TimedRobot implements Logged {
   private final CommandJoystick operatorJoystick;
 
   private final Superstructure superstructure;
-  private final Optional<Vision> vision;
   private final Climb climb;
   private final Swerve swerve;
 
@@ -108,12 +104,6 @@ public class Robot extends TimedRobot implements Logged {
 
     swerve = new Swerve();
     climb = new ClimbIOComp();
-    vision = Optional.of(new VisionIOComp());
-    addPeriodic(
-        () -> {
-          swerve.updateVisionEstimates(vision.get().getEstimatedPoses());
-        },
-        0.02);
     superstructure =
         new Superstructure(
             swerve, new ElevatorIOComp(), new TailIOComp(), new RollerIOComp(), new ChuteIOComp());
@@ -208,6 +198,8 @@ public class Robot extends TimedRobot implements Logged {
     SmartDashboard.putNumber("CPU Temps", RobotController.getCPUTemp());
     SmartDashboard.putBoolean("RSL status", RobotController.getRSLState());
     SmartDashboard.putNumber("Match Time", DriverStation.getMatchTime());
+
+    System.out.println(superstructure.getasdfsa());
 
     if (gcTimer.advanceIfElapsed(5)) {
       System.gc();
