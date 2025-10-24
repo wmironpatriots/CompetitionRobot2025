@@ -143,11 +143,15 @@ public class Superstructure {
   }
 
   /** Scores to input level */
+  // public Command scoreCoralCmmd(ReefLevel level) {
+  //  return tail.runPoseCmmd(Tail.POSE_SAFTEY)
+  //      .until(() -> tail.nearSetpoint(Tail.POSE_SAFTEY))
+  //      .andThen(
+  //          elevator.runPoseCmmd(level.elevatorPose).alongWith(tail.runPoseCmmd(level.tailPose)));
+  // }
+  /** Scores to input level */
   public Command scoreCoralCmmd(ReefLevel level) {
-    return tail.runPoseCmmd(Tail.POSE_SAFTEY)
-        .until(() -> tail.nearSetpoint(Tail.POSE_SAFTEY))
-        .andThen(
-            elevator.runPoseCmmd(level.elevatorPose).alongWith(tail.runPoseCmmd(level.tailPose)));
+    return elevator.runPoseCmmd(level.elevatorPose).alongWith(tail.runPoseCmmd(level.tailPose));
   }
 
   public Command HIGHdeAlgaeCommand() {
