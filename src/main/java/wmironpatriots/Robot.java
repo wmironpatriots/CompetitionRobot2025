@@ -130,7 +130,7 @@ public class Robot extends TimedRobot implements Logged {
             () -> -JoystickUtil.applyTeleopModifier(driver::getLeftY),
             () -> -JoystickUtil.applyTeleopModifier(driver::getLeftX),
             () -> -JoystickUtil.applyTeleopModifier(driver::getRightX),
-            () -> 1.0));
+            () -> 0.5));
     // () -> MathUtil.clamp(1.5 - driver.getRightTriggerAxis(), 0.0, 1.0)));
     driver
         .a()
