@@ -140,9 +140,9 @@ public class Robot extends TimedRobot implements Logged {
                     swerve.resetOdo(
                         new Pose2d(swerve.getPose().getTranslation(), new Rotation2d()))));
     driver.rightBumper().whileTrue(superstructure.score());
-    driver.x().whileTrue(goTo);
-    driver.rightTrigger(0.3).onTrue(setbah(0.0));
-    driver.leftTrigger(0.3).onTrue(setbah(1.0));
+    //driver.x().whileTrue(goTo);
+    //driver.rightTrigger(0.3).onTrue(setbah(0.0));
+    //driver.leftTrigger(0.3).onTrue(setbah(1.0));
 
     // driver.y().whileTrue(swerve.driveToPoseCmmd(() -> Swerve.AlignTargets.A));
     operator.a().whileTrue(superstructure.scoreCoralCmmd(ReefLevel.L1));
