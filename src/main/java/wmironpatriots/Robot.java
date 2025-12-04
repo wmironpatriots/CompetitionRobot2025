@@ -121,7 +121,7 @@ public class Robot extends TimedRobot implements Logged {
             () -> -JoystickUtil.applyTeleopModifier(driver::getLeftY),
             () -> -JoystickUtil.applyTeleopModifier(driver::getLeftX),
             () -> -JoystickUtil.applyTeleopModifier(driver::getRightX),
-            () -> 1.0));
+            () -> 0.2));
     // () -> MathUtil.clamp(1.5 - driver.getRightTriggerAxis(), 0.0, 1.0)));
     driver
         .a()
@@ -203,8 +203,6 @@ public class Robot extends TimedRobot implements Logged {
     SmartDashboard.putNumber("CPU Temps", RobotController.getCPUTemp());
     SmartDashboard.putBoolean("RSL status", RobotController.getRSLState());
     SmartDashboard.putNumber("Match Time", DriverStation.getMatchTime());
-
-    System.out.println(superstructure.getasdfsa());
 
     if (gcTimer.advanceIfElapsed(5)) {
       System.gc();
