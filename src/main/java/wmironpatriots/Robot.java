@@ -41,7 +41,7 @@ import wmironpatriots.subsystems.swerve.Swerve.AlignTargets;
 import wmironpatriots.utils.deviceUtils.JoystickUtil;
 
 public class Robot extends TimedRobot implements Logged {
-  private final CommandXboxController driver, operator;
+  private final CommandXboxController driver, operator, manager;
   private final CommandJoystick operatorJoystick;
 
   private final Superstructure superstructure;
@@ -99,6 +99,7 @@ public class Robot extends TimedRobot implements Logged {
     driver = new CommandXboxController(0);
     operator = new CommandXboxController(1);
     operatorJoystick = new CommandJoystick(2);
+    manager = new CommandXboxController(3);
 
     side = 1;
     branch = 0;
@@ -118,12 +119,14 @@ public class Robot extends TimedRobot implements Logged {
     // * SETUP BINDS
     swerve.setDefaultCommand(
         swerve.drive(
-            () -> 0.0, // -JoystickUtil.applyTeleopModifier(driver::getLeftY),
-            () -> -JoystickUtil.applyTeleopModifier(driver::getLeftX),
-            () -> 0.0, // -JoystickUtil.applyTeleopModifier(driver::getRightX),
+            () -> 0.0 + JoystickUtil.applyTeleopModifier(manager::getLeftY),
+            () ->
+                JoystickUtil.applyTeleopModifier(driver::getLeftX)
+                    + JoystickUtil.applyTeleopModifier(manager::getLeftX),
+            () -> 0.0 + (JoystickUtil.applyTeleopModifier(manager::getRightX) * 0.2),
             () -> 0.2));
     // () -> MathUtil.clamp(1.5 - driver.getRightTriggerAxis(), 0.0, 1.0)));
-    driver
+    manager
         .a()
         .whileTrue(
             Commands.run(
@@ -136,10 +139,10 @@ public class Robot extends TimedRobot implements Logged {
     // driver.leftTrigger(0.3).onTrue(setbah(1.0));
 
     // driver.y().whileTrue(swerve.driveToPoseCmmd(() -> Swerve.AlignTargets.A));
-    operator.a().whileTrue(superstructure.scoreCoralCmmd(ReefLevel.L1));
+    // operator.a().whileTrue(superstructure.scoreCoralCmmd(ReefLevel.L1));
     operator.x().whileTrue(superstructure.scoreCoralCmmd(ReefLevel.L2));
-    operator.y().whileTrue(superstructure.scoreCoralCmmd(ReefLevel.L3));
-    operator.b().whileTrue(superstructure.scoreCoralCmmd(ReefLevel.L4));
+    // operator.y().whileTrue(superstructure.scoreCoralCmmd(ReefLevel.L3));
+    // operator.b().whileTrue(superstructure.scoreCoralCmmd(ReefLevel.L4));
     operator.leftBumper().whileTrue(superstructure.intakeCoralCmmd());
     operator.rightBumper().whileTrue(superstructure.outakeCoralCmmd());
     operator.leftTrigger(.03).whileTrue(superstructure.AutointakeCoralCmmd());
