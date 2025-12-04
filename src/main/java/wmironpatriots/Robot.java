@@ -118,9 +118,9 @@ public class Robot extends TimedRobot implements Logged {
     // * SETUP BINDS
     swerve.setDefaultCommand(
         swerve.drive(
-            () -> -JoystickUtil.applyTeleopModifier(driver::getLeftY),
+            () -> 0.0, // -JoystickUtil.applyTeleopModifier(driver::getLeftY),
             () -> -JoystickUtil.applyTeleopModifier(driver::getLeftX),
-            () -> -JoystickUtil.applyTeleopModifier(driver::getRightX),
+            () -> 0.0, // -JoystickUtil.applyTeleopModifier(driver::getRightX),
             () -> 0.2));
     // () -> MathUtil.clamp(1.5 - driver.getRightTriggerAxis(), 0.0, 1.0)));
     driver
@@ -131,9 +131,9 @@ public class Robot extends TimedRobot implements Logged {
                     swerve.resetOdo(
                         new Pose2d(swerve.getPose().getTranslation(), new Rotation2d()))));
     driver.rightBumper().whileTrue(superstructure.score());
-    driver.x().whileTrue(goTo);
-    driver.rightTrigger(0.3).onTrue(setbah(0.0));
-    driver.leftTrigger(0.3).onTrue(setbah(1.0));
+    // driver.x().whileTrue(goTo);
+    // driver.rightTrigger(0.3).onTrue(setbah(0.0));
+    // driver.leftTrigger(0.3).onTrue(setbah(1.0));
 
     // driver.y().whileTrue(swerve.driveToPoseCmmd(() -> Swerve.AlignTargets.A));
     operator.a().whileTrue(superstructure.scoreCoralCmmd(ReefLevel.L1));
