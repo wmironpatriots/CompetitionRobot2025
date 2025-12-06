@@ -119,11 +119,11 @@ public class Robot extends TimedRobot implements Logged {
     // * SETUP BINDS
     swerve.setDefaultCommand(
         swerve.drive(
-            () -> 0.0 + JoystickUtil.applyTeleopModifier(manager::getLeftY),
+            () -> 0.0 + -JoystickUtil.applyTeleopModifier(manager::getLeftY),
             () ->
-                JoystickUtil.applyTeleopModifier(driver::getLeftX)
-                    + JoystickUtil.applyTeleopModifier(manager::getLeftX),
-            () -> 0.0 + (JoystickUtil.applyTeleopModifier(manager::getRightX) * 0.2),
+                -JoystickUtil.applyTeleopModifier(driver::getLeftX)
+                    + -JoystickUtil.applyTeleopModifier(manager::getLeftX),
+            () -> 0.0 + -(JoystickUtil.applyTeleopModifier(manager::getRightX) * 0.2),
             () -> 0.2));
     // () -> MathUtil.clamp(1.5 - driver.getRightTriggerAxis(), 0.0, 1.0)));
     manager
@@ -141,7 +141,7 @@ public class Robot extends TimedRobot implements Logged {
     // driver.y().whileTrue(swerve.driveToPoseCmmd(() -> Swerve.AlignTargets.A));
     // operator.a().whileTrue(superstructure.scoreCoralCmmd(ReefLevel.L1));
     operator.x().whileTrue(superstructure.scoreCoralCmmd(ReefLevel.L2));
-    // operator.y().whileTrue(superstructure.scoreCoralCmmd(ReefLevel.L3));
+    operator.y().whileTrue(superstructure.scoreCoralCmmd(ReefLevel.L3));
     // operator.b().whileTrue(superstructure.scoreCoralCmmd(ReefLevel.L4));
     operator.leftBumper().whileTrue(superstructure.intakeCoralCmmd());
     operator.rightBumper().whileTrue(superstructure.outakeCoralCmmd());
