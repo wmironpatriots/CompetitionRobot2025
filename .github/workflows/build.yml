@@ -1,0 +1,24 @@
+# Checks if code compiles
+
+name: Build
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v3
+      - name: init Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: "temurin"
+          java-version: "17"
+      - name: Grant executive perms
+        run: chmod +x gradlew
+      - name: Build Robot Code
+        run: ./gradlew build

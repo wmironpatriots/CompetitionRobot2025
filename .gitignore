@@ -186,6 +186,6 @@ compile_commands.json
 # Eclipse generated file for annotation processors
 .factorypath
 
-# Build data
-src/main/java/wmironpatriots/BuildConstants.java
-simgui*
+# Gversion build files
+/BuildConstants.java
+src/main/java/org/frc6423/robot/BuildConstants.java

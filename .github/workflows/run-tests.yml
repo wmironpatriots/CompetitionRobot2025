@@ -1,0 +1,24 @@
+# Runs all tests
+
+name: Test
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  run-tests:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v3
+      - name: init Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: "temurin"
+          java-version: "17"
+      - name: Grant executive perms
+        run: chmod +x gradlew
+      - name: Run robot tests
+        run: ./gradlew test

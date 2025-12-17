@@ -1,0 +1,36 @@
+# Checks and fixes formating with spotless if necessary
+
+name: Format
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  fix-format:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v2
+      - name: init Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: "temurin"
+          java-version: "17"
+      - name: Grant executive perms
+        run: chmod +x gradlew
+      - name: Check formatting
+        id: formatting
+        run: ./gradlew spotlessCheck
+      - name: Format Code
+        if: ${{ failure() && steps.formatting.conclusion == 'failure'}}
+        run: ./gradlew spotlessApply
+      - name: Commit and Push formatted Code
+        if: ${{ failure() && steps.formatting.conclusion == 'failure'}}
+        run: |
+          git config --global user.name 'github-actions'
+          git config --global user.email 'github-actions@github.com' 
+          git add .
+          git commit -m "auto generated"
+          git push
